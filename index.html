@@ -203,7 +203,7 @@
       kwEgo.innerHTML = `<span style="color:#ffca28; font-weight:bold;">【エゴ】</span> ${keywordsData[total].e}`;
       kwInfo.classList.add('visible');
 
-      // 初期鑑定メッセージ（AIではない固定文ですが、次からAIになります）
+      // 初期鑑定メッセージ
       addMessage(`鑑定が完了しました。あなたの「音」に刻まれた数字は「${total}」です。<br>この数字が示す使命をふまえ、あなたのお悩みについて深く読み解いていきましょう。具体的に気になっていることはありますか？`, 'app');
     });
 
@@ -228,23 +228,26 @@
           })
         });
 
-        if (!response.ok) throw new Error('API通信失敗');
+        // 成功でもエラーでも、Vercelから返ってきた reply をそのまま画面に出す
         const data = await response.json();
         chatContainer.removeChild(indicator);
         addMessage(data.reply, 'app');
 
       } catch (e) {
+        // JS自体のエラー（ネットワーク切断など）
         if (indicator.parentNode) chatContainer.removeChild(indicator);
-        addMessage("星の導きがうまく届かなかったようです。Vercelの環境変数設定を再確認してください。", 'app');
+        addMessage(`通信プログラムのエラーです: ${e.message}`, 'app');
       }
     }
 
     function addMessage(text, type) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `message ${type}-message`;
-      msgDiv.innerHTML = text;
+      // 改行を正しく表示する処理
+      msgDiv.innerHTML = text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
       chatContainer.appendChild(msgDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      // メッセージ追加時に必ず一番下までスクロールする
+      chatContainer.scrollTop = chatContainer.scrollHeight; 
     }
 
     document.getElementById('send-btn').onclick = () => {
