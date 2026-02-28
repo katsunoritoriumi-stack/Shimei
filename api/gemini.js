@@ -3,7 +3,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POSTメソッドのみ許可されています' });
   }
 
-  // HTML側から送られてくる名前に合わせました
   const { userText, currentNumber } = req.body;
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -23,10 +22,9 @@ export default async function handler(req, res) {
     "9": { mission: "未来と表現：意外・芸術・言葉・数字・気力・爆発", ego: "在り来りな：怠惰・批判・我慢・静止・怒り・放置・執着" }
   };
 
-  // currentNumber を文字列にして確実に一致させる
   const data = numerologyData[String(currentNumber)];
   if (!data) {
-    return res.status(400).json({ error: `有効な数秘（1〜9）が指定されていません。受信した値: ${currentNumber}` });
+    return res.status(400).json({ error: '有効な数秘（1〜9）が指定されていません。' });
   }
 
   const prompt = `あなたは数秘術とカタカムナ音霊鑑定の奥義を極めた、慈愛に満ちた熟練カウンセラーです。
@@ -43,7 +41,6 @@ export default async function handler(req, res) {
 3. 本来の「使命」の力を取り戻し、どう乗り越えるべきか具体的に導いてください。`;
 
   try {
-    // 安定して稼働する標準モデルを指定（モデル名エラーを防ぐため、一番確実な1.5-flashにしています）
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
@@ -71,7 +68,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'AIからの応答が空でした。' });
     }
 
-    // 成功時、text という名前で返す
     return res.status(200).json({ text: aiResponseText });
 
   } catch (error) {
