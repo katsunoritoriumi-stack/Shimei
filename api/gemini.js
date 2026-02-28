@@ -41,7 +41,8 @@ export default async function handler(req, res) {
 3. 本来の「使命」の力を取り戻し、どう乗り越えるべきか具体的に導いてください。`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // ★あなたが教えてくれた「上手く行った実績のあるURL」に完全に戻しました！
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
