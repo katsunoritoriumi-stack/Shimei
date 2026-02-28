@@ -1,79 +1,59 @@
 export default async function handler(req, res) {
+  // POSTアクセス以外をブロック
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'POSTメソッドのみ許可されています' });
+    return res.status(405).json({ reply: "エラー：POSTメソッドのみ許可されています。" });
   }
 
-  const { userText, currentNumber } = req.body;
-  const apiKey = process.env.GEMINI_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: 'サーバー側にAPIキーが設定されていません。VercelのSettingsから設定してください。' });
+  const API_KEY = process.env.GEMINI_API_KEY;
+  if (!API_KEY) {
+    return res.status(500).json({ reply: "エラー：VercelにGEMINI_API_KEYが設定されていません。" });
   }
 
-  const numerologyData = {
-    "1": { mission: "求める根源：本質・本物・根源・懸け橋・要点・決断", ego: "答えを探す：迷走・保留・依頼心・複雑・諦め" },
-    "2": { mission: "助け合う心：整理・要約・適格・順序・共感・親切・指導", ego: "興奮と反感：雑・散漫・反発・慢心・優越感・逆行" },
-    "3": { mission: "工夫と結果：具現・学習・技術・結果・客観力・地道・形", ego: "衰退と下落：無気力・憔悴・逃避・疲労・他人軸・口先" },
-    "4": { mission: "特別な価値：語彙力・経験・体験・旅・世・自然・質問・希望", ego: "停滞と無視：長話・孤独・停止・静観・落胆" },
-    "5": { mission: "受伝と送伝：音・文・響・芸・話・表情・情報・発信・広域", ego: "愚行と惰性：噂・悪口・疑心・秘密・否定・隠蔽" },
-    "6": { mission: "安心と展開：察知・提供・準備・先見・優しさ・安心", ego: "執着と強欲：強欲・見返り・損得・慢心・傲慢・我" },
-    "7": { mission: "調和と循環：同調・保護・育成・沈着・丁寧・平和", ego: "対峙と利用：差別・批判・正義・強気・緊張・焦り・適当・搾取" },
-    "8": { mission: "自分と理想：哲学・追求・美学・誇り・直感・自立・行動", ego: "虚勢と仮面：利己・理屈・狡猾・虚栄・誇張" },
-    "9": { mission: "未来と表現：意外・芸術・言葉・数字・気力・爆発", ego: "在り来りな：怠惰・批判・我慢・静止・怒り・放置・執着" }
-  };
+  // フロントエンドからのデータを受け取る
+  const { message, number, context } = req.body;
 
-  const data = numerologyData[currentNumber];
-  if (!data) {
-    return res.status(400).json({ error: '有効な数秘（1〜9）が指定されていません。' });
+  // データが欠損している場合のエラー処理
+  if (!number || !context) {
+    return res.status(400).json({ reply: "エラー：フロントエンドから「音」のデータが正しく送られてきませんでした。" });
   }
 
-  const prompt = `あなたは数秘術とカタカムナ音霊鑑定の奥義を極めた、慈愛に満ちた熟練カウンセラーです。
-ユーザーは「${currentNumber}の音」の持ち主です。
+  // AIへの指示書（プロンプト）
+  const prompt = `あなたは「使命鑑定ナビ」の熟練鑑定士です。
+相談者の数秘（音）は「${number}」です。
+この数字の使命は「${context.m}」、エゴは「${context.e}」です。
 
-【使命（本来の光）】: ${data.mission}
-【エゴ（闇の状態）】: ${data.ego}
+相談者からの悩み: "${message}"
 
-相談内容: 「${userText}」
-
-以下の指針で、ユーザーの魂を震わせるような深いアドバイスを300〜500文字で作成してください。
-1. 「〜というお悩みですね」「深呼吸をして〜」などの定型文は排除し、親友に語りかけるような温かい言葉で始めてください。
-2. 悩みの中で、どの「エゴ」の要素が影響しているか、優しく分析してください。
-3. 本来の「使命」の力を取り戻し、どう乗り越えるべきか具体的に導いてください。`;
+【鑑定ルール】
+1. 鑑定士らしい落ち着いた、神秘的で温かいトーンで語りかけてください。
+2. 数秘「${number}」の特性を深く踏まえ、現在の悩みが「使命」を活かすためのどのようなステップであるかを詳しく伝えてください。
+3. エゴ（${context.e}）に陥らないための具体的な心の持ち方をアドバイスしてください。
+4. 400文字程度で、相談者が前向きな一歩を踏み出せるように詳しく回答してください。
+5. 「AI」や「システム」といった言葉は一切出さないでください。`;
 
   try {
-    // 最新の推奨モデル「gemini-3-flash-preview」に変更
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          // 文字数制限を2000に増やして、途切れを防止
-          maxOutputTokens: 2000,
-          temperature: 0.7,
-        }
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
-    const result = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
-      console.error('Gemini API Error:', result);
-      return res.status(response.status).json({ error: result.error?.message || 'Gemini APIとの通信に失敗しました' });
+      return res.status(500).json({ reply: `Gemini通信エラーが発生しました: ${data.error?.message || response.status}` });
     }
 
-    const aiResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-    
-    if (!aiResponseText) {
-      return res.status(500).json({ error: 'AIからの応答が空でした。' });
+    if (data.candidates && data.candidates.length > 0) {
+      const reply = data.candidates[0].content.parts[0].text;
+      return res.status(200).json({ reply: reply });
+    } else {
+      return res.status(500).json({ reply: "エラー：Geminiからの返答が空でした。" });
     }
-
-    return res.status(200).json({ text: aiResponseText });
 
   } catch (error) {
-    console.error('Fetch Error:', error);
-    return res.status(500).json({ error: 'サーバー内部でエラーが発生しました。' });
+    return res.status(500).json({ reply: `サーバー内部エラー: ${error.message}` });
   }
 }
