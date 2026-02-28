@@ -41,8 +41,8 @@ export default async function handler(req, res) {
 3. 本来の「使命」の力を取り戻し、どう乗り越えるべきか具体的に導いてください。`;
 
   try {
-    // ★ 安定版の「gemini-2.0-flash」に変更
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    // 最新の推奨モデル「gemini-3-flash-preview」に変更
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          // ★ AIが話せる文字数の限界を「2000」に大幅アップ
+          // 文字数制限を2000に増やして、途切れを防止
           maxOutputTokens: 2000,
           temperature: 0.7,
         }
