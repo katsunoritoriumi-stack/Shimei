@@ -1,17 +1,18 @@
 export default async function handler(req, res) {
-  // POST通信以外は弾く
+  // 1. メソッドチェック
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POSTメソッドのみ許可されています' });
   }
 
   const { userText, currentNumber } = req.body;
-  // Vercelに登録するAPIキーをここで読み込みます
-  const apiKey = process.env.GEMINI_API_KEY;
 
+  // 2. 環境変数の取得とチェック
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'サーバー側にAPIキーが設定されていません。' });
+    return res.status(500).json({ error: 'サーバー側にAPIキーが設定されていません。VercelのSettingsから設定してください。' });
   }
 
+  // 3. 数秘データの定義
   const numerologyData = {
     "1": { mission: "求める根源：本質・本物・根源・懸け橋・要点・決断", ego: "答えを探す：迷走・保留・依頼心・複雑・諦め" },
     "2": { mission: "助け合う心：整理・要約・適格・順序・共感・親切・指導", ego: "興奮と反感：雑・散漫・反発・慢心・優越感・逆行" },
@@ -25,44 +26,58 @@ export default async function handler(req, res) {
   };
 
   const data = numerologyData[currentNumber];
-  if (!data) return res.status(400).json({ error: '無効な数秘です' });
+  if (!data) {
+    return res.status(400).json({ error: '有効な数秘（1〜9）が指定されていません。' });
+  }
 
-  const prompt = `
-    あなたは数秘術とカタカムナ音霊鑑定の奥義を極めた、慈愛に満ちた熟練カウンセラーです。
-    ユーザーは「${currentNumber}の音」の持ち主です。
-    
-    【使命（本来の光）】: ${data.mission}
-    【エゴ（闇の状態）】: ${data.ego}
-    
-    相談内容: 「${userText}」
-    
-    以下の指針で、ユーザーの魂を震わせるような深いアドバイスを300〜500文字で作成してください。
-    1. 「〜というお悩みですね」「深呼吸をして〜」「〜に傾いているのかもしれません」などの機械的な定型文は絶対に禁止。
-    2. まるで目の前で悩んでいる親友に語りかけるように、温かく人間味のある言葉で紡いでください。
-    3. その悩みの中で、どの「エゴ」の要素が強く出てしまっているか、優しく論理的に分析する。
-    4. 本来持っている「使命」の力を取り戻し、この悩みをどう乗り越えて「真実の自分」として輝くべきか、具体的に導く。
-    5. 専門用語を並べるだけでなく、心に寄り添う温かい言葉で語りかける。
-  `;
+  // 4. プロンプトの構築
+  const prompt = `あなたは数秘術とカタカムナ音霊鑑定の奥義を極めた、慈愛に満ちた熟練カウンセラーです。
+ユーザーは「${currentNumber}の音」の持ち主です。
+
+【使命（本来の光）】: ${data.mission}
+【エゴ（闇の状態）】: ${data.ego}
+
+相談内容: 「${userText}」
+
+以下の指針で、ユーザーの魂を震わせるような深いアドバイスを300〜500文字で作成してください。
+1. 「〜というお悩みですね」「深呼吸をして〜」などの定型文は排除し、親友に語りかけるような温かい言葉で始めてください。
+2. 悩みの中で、どの「エゴ」の要素が影響しているか、優しく分析してください。
+3. 本来の「使命」の力を取り戻し、どう乗り越えるべきか具体的に導いてください。`;
 
   try {
-    // 安定して動作する最新モデルを直接指定
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // 5. モデル名を現行の安定版 'gemini-1.5-flash' に修正
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          maxOutputTokens: 800,
+          temperature: 0.7,
+        }
+      })
     });
-    
+
     const result = await response.json();
-    
-    if (result.error) {
-      return res.status(500).json({ error: result.error.message });
+
+    if (!response.ok) {
+      console.error('Gemini API Error:', result);
+      return res.status(response.status).json({ error: result.error?.message || 'Gemini APIとの通信に失敗しました' });
     }
+
+    // 6. レスポンスの抽出
+    const aiResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
     
-    // 生成されたテキストだけをフロントに返す
-    return res.status(200).json({ text: result.candidates[0].content.parts[0].text });
+    if (!aiResponseText) {
+      return res.status(500).json({ error: 'AIからの応答が空でした。' });
+    }
+
+    return res.status(200).json({ text: aiResponseText });
 
   } catch (error) {
-    return res.status(500).json({ error: 'サーバー通信に失敗しました' });
+    console.error('Fetch Error:', error);
+    return res.status(500).json({ error: 'サーバー内部でエラーが発生しました。' });
   }
 }
