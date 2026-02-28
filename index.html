@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>使命鑑定ナビ</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Klee+One&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
@@ -27,37 +27,19 @@
       font-family: '游明朝', 'YuMincho', serif;
       background: var(--soft-beige);
       background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDUwIDUwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNFMUJFRTciIGZpbGwtb3BhY2l0eT0iMC4xNSI+PHBhdGggZD0iTTUwIDUwSDVWNUg1MHZ4NUg1MFoiLz48L2c+PC9nPjwvc3ZnPg=='); 
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow-x: hidden; /* ★横揺れを完全に防ぐ */
-      width: 100vw;
-      position: relative;
+      margin: 0; display: flex; justify-content: center; align-items: center;
+      height: 100vh; overflow-x: hidden; width: 100vw; position: relative;
     }
 
     .app-container {
-      width: 100%; 
-      max-width: 420px; 
-      height: 98vh; 
-      background: var(--app-bg);
-      display: flex; 
-      flex-direction: column; 
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15); 
-      overflow-x: hidden; /* ★コンテナ内の横ブレも防ぐ */
-      border: 1px solid rgba(212, 175, 55, 0.2); 
-      position: relative;
+      width: 100%; max-width: 500px; height: 98vh; background: var(--app-bg);
+      display: flex; flex-direction: column; border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden;
+      border: 1px solid rgba(212, 175, 55, 0.2); position: relative;
     }
 
-    /* ★スマホで見た時の特別設定（画面を最大限広く使う） */
     @media (max-width: 480px) {
-      .app-container {
-        height: 100dvh; /* スマホのブラウザ枠にピッタリ合わせる */
-        border-radius: 0; /* 角丸をなくして画面いっぱいにする */
-        border: none;
-      }
+      .app-container { height: 100dvh; border-radius: 0; border: none; }
     }
     
     .congrats-overlay {
@@ -67,133 +49,108 @@
       opacity: 0; transition: opacity 0.5s;
     }
     .congrats-overlay.visible { display: flex; opacity: 1; }
-    .congrats-content {
-      text-align: center; color: var(--gold-accent);
-      font-family: 'Klee One', cursive; animation: congratsPop 1s ease-out;
-    }
+    .congrats-content { text-align: center; color: var(--gold-accent); font-family: 'Klee One', cursive; animation: congratsPop 1s ease-out; }
     .congrats-text { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
     .congrats-sparkles { font-size: 4rem; animation: sparkleRotate 2s linear infinite; }
     
+    @keyframes congratsPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes sparkleRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     header {
       background: var(--primary-gradient); color: #FFF; padding: 15px; 
-      text-align: center; position: relative; z-index: 10;
-      transition: var(--transition-base); /* アニメーションで滑らかに縮む */
+      text-align: center; position: relative; z-index: 10; transition: var(--transition-base);
     }
-    header::after {
-      content: ''; position: absolute; bottom: 0; left: 10%;
-      width: 80%; height: 1px; background: var(--gold-accent);
-    }
-    header h1 {
-      margin: 0 0 10px 0; font-size: 1.4rem; font-family: 'Playfair Display', serif; 
-      letter-spacing: 0.05em; display: flex; justify-content: center; align-items: center;
-      transition: var(--transition-base);
-    }
+    header::after { content: ''; position: absolute; bottom: 0; left: 10%; width: 80%; height: 1px; background: var(--gold-accent); }
+    header h1 { margin: 0 0 10px 0; font-size: 1.4rem; font-family: 'Playfair Display', serif; display: flex; justify-content: center; align-items: center; }
     .header-icon { font-size: 1.5rem; color: var(--gold-accent); margin-right: 8px; }
     
-    .calculator-container {
-      display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 5px; 
-      transition: var(--transition-base);
-    }
+    .calculator-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 5px; transition: var(--transition-base); }
     .name-input-wrapper { position: relative; width: 85%; margin-top: 25px; transition: var(--transition-base); }
     .name-input {
-      width: 100%; padding: 10px 18px; border: 2px solid var(--border-soft);
-      border-radius: 30px; text-align: center; outline: none; font-size: 1.1rem;
-      transition: var(--transition-base); font-family: 'Klee One', cursive; 
+      width: 100%; padding: 10px 18px; border: 2px solid var(--border-soft); border-radius: 30px;
+      text-align: center; outline: none; font-size: 1.1rem; transition: var(--transition-base); font-family: 'Klee One', cursive; 
     }
-    .name-input:focus { border-color: var(--dusty-pink); box-shadow: 0 0 10px rgba(225, 190, 231, 0.5); }
     .name-input-wrapper::after {
-      content: '＼ お名前（ひらがな）をどうぞ ／'; position: absolute; top: -28px; 
-      left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: var(--gold-accent);
-      font-family: 'Klee One', cursive; white-space: nowrap; background: rgba(26, 37, 58, 0.8); 
-      padding: 2px 10px; border-radius: 10px; transition: var(--transition-base);
+      content: '＼ お名前（ひらがな）をどうぞ ／'; position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+      font-size: 0.8rem; color: var(--gold-accent); font-family: 'Klee One', cursive; white-space: nowrap;
+      background: rgba(26, 37, 58, 0.8); padding: 2px 10px; border-radius: 10px;
     }
     .calc-btn {
       background: var(--navy-accent); color: var(--gold-accent); border: 1px solid var(--gold-accent);
       padding: 8px 24px; border-radius: 20px; font-family: 'Playfair Display', 'YuMincho', serif;
-      font-size: 0.9rem; cursor: pointer; transition: var(--transition-base);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px;
+      font-size: 0.9rem; cursor: pointer; transition: var(--transition-base); display: flex; align-items: center; gap: 5px;
     }
-    .calc-btn:hover { background: var(--gold-accent); color: var(--navy-accent); box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); }
-    .calc-btn:active { transform: translateY(2px); }
-    .calc-result {
-      width: 85%; background: rgba(255,255,255,0.25); border-radius: 12px;
-      padding: 8px; font-size: 0.85rem; display: none; text-align: center; color: #FFF;
-      border: 1px solid rgba(255,255,255,0.4); font-family: 'Playfair Display', serif;
-    }
-    .calc-result.visible { display: block; animation: fadeIn 0.5s ease-out; }
-    .number-highlight { font-size: 1.3rem; color: var(--gold-accent); font-weight: bold; position: relative; transition: var(--transition-base); }
+    .calc-btn:hover { background: var(--gold-accent); color: var(--navy-accent); }
     
-    /* ★魔法のコンパクトモード（ボタンを押すとヘッダーがギュッと縮む） */
-    header.compact { padding: 10px; }
-    header.compact h1 { display: none; /* タイトルを隠す */ }
-    header.compact .calculator-container { 
-      flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 0; 
+    .calc-result { width: 85%; background: rgba(255,255,255,0.25); border-radius: 12px; padding: 8px; font-size: 0.85rem; display: none; text-align: center; color: #FFF; border: 1px solid rgba(255,255,255,0.4); font-family: 'Playfair Display', serif; }
+    .calc-result.visible { display: block; animation: fadeIn 0.5s ease-out; }
+    .number-highlight { font-size: 1.3rem; color: var(--gold-accent); font-weight: bold; }
+
+    .keyword-btn {
+      background: transparent; border: 1px solid rgba(255,255,255,0.6); color: #FFF;
+      padding: 4px 12px; border-radius: 15px; font-size: 0.75rem; cursor: pointer;
+      margin-top: 5px; display: none; transition: var(--transition-base);
     }
+    
+    header.compact { padding: 10px; }
+    header.compact h1 { display: none; }
+    header.compact .calculator-container { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 0; }
     header.compact .name-input-wrapper { margin-top: 0; width: auto; flex: 1; max-width: 140px; }
-    header.compact .name-input-wrapper::after { display: none; /* ラベルを隠す */ }
+    header.compact .name-input-wrapper::after { display: none; }
     header.compact .name-input { padding: 6px 10px; font-size: 0.9rem; }
     header.compact .calc-btn { padding: 6px 12px; font-size: 0.8rem; }
     header.compact .calc-result { width: 100%; margin-top: 0; padding: 4px; font-size: 0.8rem; }
+    header.compact .keyword-btn { display: block; }
 
-    @keyframes sparkleRotate { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; } 100% { transform: scale(1) rotate(360deg); opacity: 1; } }
-    @keyframes congratsPop { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-    
     #chat-container {
       flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;
-      background: #FAFCFD; background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCIgdmlld0JveD0iMCAwIDgwIDgwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNEMDRBRjM3IiBmaWxsLW9wYWNpdHQ9IjAuMDQiPjxwYXRoIGQ0PSJNNDAgNDBDNTUuMjYgNDAgNzQgNjcuMzMgNzQgNTBDNzQgMzIuNjcgNTUuMjYgMCA0MCAwUzYgMzIuNjcgNiA1MEM2IDY3LjMzIDguNDcgNDAgNDAgNDBaIi8+PC9nPjwvc3ZnPg=='); 
-      scroll-behavior: smooth; position: relative;
+      background: #FAFCFD; scroll-behavior: smooth;
     }
     #chat-container::-webkit-scrollbar { width: 6px; }
     #chat-container::-webkit-scrollbar-thumb { background-color: #DDE2E5; border-radius: 10px; }
-    
+
+    .pinned-question {
+      position: sticky; top: 0; background: rgba(255, 255, 255, 0.95);
+      padding: 10px 15px; border-bottom: 2px solid var(--gold-accent);
+      z-index: 50; margin: -15px -15px 15px -15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: none; backdrop-filter: blur(5px);
+    }
+    .pinned-label { font-size: 0.75rem; color: var(--navy-accent); font-weight: bold; margin-bottom: 4px; font-family: 'Klee One', cursive;}
+
     .message {
-      max-width: 85%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem;
-      line-height: 1.6; position: relative; z-index: 2;
-      /* ★はみ出し防止 */
-      word-wrap: break-word; overflow-wrap: anywhere; word-break: normal;
+      max-width: 95%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem;
+      line-height: 1.6; word-wrap: break-word; overflow-wrap: anywhere;
+      animation: fadeIn 0.4s ease-out;
     }
-    .user-message {
-      align-self: flex-end; background: var(--primary-gradient); color: var(--text-user);
-      border-bottom-right-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid var(--gold-accent);
-    }
-    .app-message {
-      align-self: flex-start; background: #FFF; border: 1px solid #EEF2F5; color: var(--text-main);
-      border-bottom-left-radius: 4px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }
-    .app-message::before {
-      content: '\f19d'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute;
-      top: -12px; left: -12px; font-size: 1.2rem; color: var(--gold-accent); background: #FFF;
-      border-radius: 50%; padding: 2px;
-    }
+    .user-message { align-self: flex-end; background: var(--primary-gradient); color: var(--text-user); border-bottom-right-radius: 4px; border: 1px solid var(--gold-accent); }
+    .app-message { align-self: flex-start; background: #FFF; border: 1px solid #EEF2F5; color: var(--text-main); border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .system-message { align-self: center; background: #FFF3CD; color: #856404; padding: 8px 16px; border-radius: 15px; font-size: 0.8rem; border: 1px solid var(--gold-accent); }
     
-    .system-message {
-      align-self: center; background: #FFF3CD; color: #856404; padding: 8px 16px; border-radius: 15px;
-      font-size: 0.8rem; text-align: center; border: 1px solid var(--gold-accent); font-family: 'Klee One', cursive;
-    }
-    .typing-indicator {
-      align-self: flex-start; display: flex; gap: 5px; padding: 12px 18px; background: #FFF;
-      border: 1px solid #EEF2F5; border-radius: 20px; border-bottom-left-radius: 4px;
-    }
+    .typing-indicator { align-self: flex-start; display: flex; gap: 5px; padding: 12px 18px; background: #FFF; border: 1px solid #EEF2F5; border-radius: 20px; border-bottom-left-radius: 4px; }
     .typing-indicator span { width: 6px; height: 6px; background: #BDC3C7; border-radius: 50%; animation: bounce 1.4s infinite; }
     @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    
+
     .input-area { display: flex; padding: 12px; border-top: 1px solid #EEF2F5; gap: 8px; background: #FFF; z-index: 10; }
-    #chat-input {
-      flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #E5E8E8; outline: none;
-      font-size: 0.95rem; transition: var(--transition-base); width: 100%;
+    #chat-input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #E5E8E8; outline: none; font-size: 0.95rem; }
+    #send-btn { background: var(--accent-gradient); color: #FFF; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* モーダル */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); z-index: 2000; display: none;
+      justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
     }
-    #chat-input:focus { border-color: var(--dusty-pink); box-shadow: 0 0 10px rgba(225, 190, 231, 0.5); }
-    #send-btn {
-      background: linear-gradient(135deg, #D4AF37 0%, #b58900 100%); color: #FFF; border: none;
-      border-radius: 50%; width: 44px; height: 44px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center;
-      justify-content: center; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); transition: var(--transition-base); position: relative;
+    .modal-overlay.visible { display: flex; opacity: 1; }
+    .modal-content {
+      background: #FFF; width: 90%; max-width: 450px; max-height: 80vh;
+      border-radius: 20px; padding: 25px; overflow-y: auto; position: relative;
     }
-    #send-btn:active { transform: translateY(2px); }
-    #send-btn:hover { filter: brightness(1.1); box-shadow: 0 4px 20px rgba(212, 175, 55, 0.6); }
-    #send-btn i { font-size: 1.2rem; color: #FFF; }
-    #send-btn:hover i { animation: planeFly 0.5s ease-out; }
-    @keyframes planeFly { 0% { transform: translate(0, 0); opacity: 1; } 50% { transform: translate(15px, -15px); opacity: 0; } 100% { transform: translate(0, 0); opacity: 1; } }
+    .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+    .keyword-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #E5E8E8; }
+    .keyword-item h3 { margin: 0 0 5px 0; color: var(--gold-accent); }
+    .label-mission { font-weight: bold; color: #3C5A99; }
+    .label-ego { font-weight: bold; color: #b58900; }
   </style>
 </head>
 <body>
@@ -202,6 +159,14 @@
       <div class="congrats-sparkles"><i class="fas fa-magic"></i></div>
       <div class="congrats-text">おめでとう！</div>
       <div class="congrats-subtext">あなたの「音」が見つかりました</div>
+    </div>
+  </div>
+
+  <div id="keywords-modal" class="modal-overlay">
+    <div class="modal-content">
+      <button id="close-modal" class="close-btn"><i class="fas fa-times"></i></button>
+      <h2 style="text-align:center; font-family:'Playfair Display', serif; border-bottom: 2px solid #D4AF37; padding-bottom:10px;">数秘キーワード一覧</h2>
+      <div id="keywords-list-container"></div>
     </div>
   </div>
 
@@ -214,11 +179,18 @@
         </div>
         <button id="calc-btn" class="calc-btn"><i class="fas fa-sparkles"></i> 音を導き出す</button>
         <div id="calc-result" class="calc-result"></div>
+        <button id="open-keywords-btn" class="keyword-btn"><i class="fas fa-book-open"></i> 全てのキーワードを見る</button>
       </div>
     </header>
+    
     <div id="chat-container">
+      <div id="pinned-question" class="pinned-question">
+        <div class="pinned-label"><i class="fas fa-pen-nib"></i> あなたの相談内容</div>
+        <div id="pinned-text" class="pinned-text"></div>
+      </div>
       <div class="message app-message">こんにちは。<br>あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br>まずはお名前をひらがなで入力し、「音を導き出す」ボタンを押してください。</div>
     </div>
+    
     <div class="input-area">
       <input type="text" id="chat-input" placeholder="お悩みをご相談ください...">
       <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
@@ -228,8 +200,20 @@
   <script>
     const charValues = {
       'あ':18,'い':5,'う':19,'え':43,'お':40,'か':25,'き':29,'く':11,'け':35,'こ':16,'さ':28,'し':23,'す':21,'せ':36,'そ':30,'た':26,'ち':27,'つ':44,'て':9,'と':17,'な':14,'に':32,'ぬ':39,'ね':46,'の':20,'は':42,'ひ':1,'ふ':2,'へ':22,'ほ':47,'ま':6,'み':3,'む':13,'め':10,'も':33,'や':15,'ゆ':37,'よ':4,'ら':31,'り':8,'る':12,'れ':24,'ろ':34,'わ':7,'ん':48,
-      'が':-25,'ぎ':-29,'ぐ':-11,'げ':-35,'ご':-16,'ざ':-28,'じ':-23,'ず':-21,'ぜ':-36,'ぞ':-30,'だ':-26,'ぢ':-27,'づ':-44,'で':-9,'ど':-17,'ば':-42,'び':-1,'ぶ':-2,'べ':-22,'ぼ':-47,'ぱ':-42,'ぴ':-1,'ぷ':-2,'ぺ':-22,'ぽ':-47
+      'が':25,'ぎ':29,'ぐ':11,'げ':35,'ご':16,'ざ':28,'じ':23,'ず':21,'ぜ':36,'ぞ':30,'だ':26,'ぢ':27,'づ':44,'で':9,'ど':17,'ば':42,'び':1,'ぶ':2,'べ':22,'ぼ':47,'ぱ':42,'ぴ':1,'ぷ':2,'ぺ':22,'ぽ':47
     };
+
+    const keywordsData = [
+      { num: 1, mission: "本質・本物・根源・懸け橋・要点・決断", ego: "迷走・保留・依頼心・複雑・諦め" },
+      { num: 2, mission: "整理・要約・適格・順序・共感・親切・指導", ego: "雑・散漫・反発・慢心・優越感・逆行" },
+      { num: 3, mission: "具現・学習・技術・結果・客観力・地道・形", ego: "無気力・憔悴・逃避・疲労・他人軸・口先" },
+      { num: 4, mission: "語彙力・経験・体験・旅・世・自然・質問・希望", ego: "長話・孤独・停止・静観・落胆" },
+      { num: 5, mission: "音・文・響・芸・話・表情・情報・発信・広域", ego: "噂・悪口・疑心・秘密・否定・隠蔽" },
+      { num: 6, mission: "察知・提供・準備・先見・優しさ・安心", ego: "強欲・見返り・損得・慢心・傲慢・我" },
+      { num: 7, mission: "同調・保護・育成・沈着・丁寧・平和", ego: "差別・批判・正義・強気・緊張・焦り・適当・搾取" },
+      { num: 8, mission: "哲学・追求・美学・誇り・直感・自立・行動", ego: "利己・理屈・狡猾・虚栄・誇張" },
+      { num: 9, mission: "意外・芸術・言葉・数字・気力・爆発", ego: "怠惰・批判・我慢・静止・怒り・放置・執着" }
+    ];
 
     const congratsOverlay = document.getElementById('congrats-overlay');
     const mainHeader = document.getElementById('main-header');
@@ -239,21 +223,33 @@
     const chatContainer = document.getElementById('chat-container');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
+    const pinnedQuestion = document.getElementById('pinned-question');
+    const pinnedText = document.getElementById('pinned-text');
+    const keywordsModal = document.getElementById('keywords-modal');
+    const openKeywordsBtn = document.getElementById('open-keywords-btn');
+    const closeModal = document.getElementById('close-modal');
+    const keywordsListContainer = document.getElementById('keywords-list-container');
     
     let currentNumber = null;
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
+    // キーワード生成
+    keywordsData.forEach(data => {
+      const div = document.createElement('div');
+      div.className = 'keyword-item';
+      div.innerHTML = `<h3>${data.num}の音</h3><p class="keyword-text"><span class="label-mission">【使命】</span> ${data.mission}</p><p class="keyword-text"><span class="label-ego">【エゴ】</span> ${data.ego}</p>`;
+      keywordsListContainer.appendChild(div);
     });
+
+    openKeywordsBtn.onclick = () => keywordsModal.classList.add('visible');
+    closeModal.onclick = () => keywordsModal.classList.remove('visible');
+    window.onclick = (e) => { if(e.target == keywordsModal) keywordsModal.classList.remove('visible'); };
 
     calcBtn.addEventListener('click', () => {
       const name = nameInput.value.replace(/[^ぁ-んが-ぼぱ-ぽ]/g, '');
       if (!name) { 
         calcResult.innerHTML = `ひらがなでお名前を入力してください`;
         calcResult.classList.add('visible'); 
-        currentNumber = null; return; 
+        return; 
       }
       
       let sum = 0;
@@ -266,22 +262,22 @@
         calcResult.innerHTML = `あなたの音: <span class="number-highlight">${total}の音</span>`;
         calcResult.classList.add('visible');
         showCongratsAnimation(); 
-      } else {
-        calcResult.classList.add('visible');
+        addMessage(`鑑定が完了しました。あなたの音は「${total}」です。`, 'system');
       }
-      
-      // ★鑑定成功時にヘッダーを縮ませる魔法を実行
       mainHeader.classList.add('compact');
-    });
-    
-    // 名前の入力をし直そうとしたら、ヘッダーを元の大きさに戻す
-    nameInput.addEventListener('focus', () => {
-      mainHeader.classList.remove('compact');
     });
 
     function showCongratsAnimation() {
       congratsOverlay.classList.add('visible');
       setTimeout(() => { congratsOverlay.classList.remove('visible'); }, 1500);
+    }
+
+    function addMessage(text, type) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${type}-message`;
+      msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     async function generateAIResponse(userText) {
@@ -295,54 +291,30 @@
         const response = await fetch('/api/gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userText: userText, currentNumber: currentNumber })
+          body: JSON.stringify({ message: userText, number: currentNumber })
         });
-        
-        const result = await response.json();
-        indicator.remove();
-
-        if (result.error) {
-          appendMessage("エラー: " + result.error, 'system');
-          return;
-        }
-        
-        appendMessage(result.text, 'app');
-
+        const data = await response.json();
+        chatContainer.removeChild(indicator);
+        addMessage(data.reply || "鑑定の結果、導き出されたメッセージです。", 'app');
       } catch (e) {
-        indicator.remove();
-        appendMessage("通信失敗。ネット接続を確認してください。", 'system');
-      }
-    }
-
-    function appendMessage(text, sender) {
-      const div = document.createElement('div');
-      div.className = `message ${sender}-message`;
-      div.innerHTML = text.replace(/\n/g, '<br>');
-      chatContainer.appendChild(div);
-      
-      div.style.animation = 'fadeIn 0.5s ease-out';
-
-      if (sender === 'app') {
-        setTimeout(() => { div.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
-      } else {
-        setTimeout(() => { chatContainer.scrollTop = chatContainer.scrollHeight; }, 50);
+        if (indicator.parentNode) chatContainer.removeChild(indicator);
+        addMessage("現在は鑑定モード（デモ）です。サーバー連携後にAIとの対話が可能になります。", 'app');
       }
     }
 
     sendBtn.addEventListener('click', () => {
       const text = chatInput.value.trim();
-      if (!currentNumber) { 
-        appendMessage("上の「音を導き出す」ボタンを押して、数秘を確定させてくださいね。", 'system'); return; 
+      if (!text) return;
+      if (pinnedQuestion.style.display === 'none' || !pinnedQuestion.style.display) {
+        pinnedText.innerText = text;
+        pinnedQuestion.style.display = 'block';
       }
-      if (text) {
-        appendMessage(text, 'user');
-        chatInput.value = '';
-        generateAIResponse(text);
-      }
+      addMessage(text, 'user');
+      chatInput.value = '';
+      generateAIResponse(text);
     });
 
-    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendBtn.click(); });
-    congratsOverlay.addEventListener('click', () => { congratsOverlay.classList.remove('visible'); });
+    chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendBtn.click(); });
   </script>
 </body>
 </html>
