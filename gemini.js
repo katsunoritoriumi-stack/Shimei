@@ -1,17 +1,23 @@
-module.exports = async function handler(req, res) {
-  // POST以外のアクセスを弾く
+export default async function handler(req, res) {
+  // POSTアクセス以外をブロック
   if (req.method !== 'POST') {
     return res.status(405).json({ reply: "エラー：POSTメソッドのみ許可されています。" });
   }
 
   const API_KEY = process.env.GEMINI_API_KEY;
-  // もしAPIキーがうまく読み込めていない場合のエラー
   if (!API_KEY) {
-    return res.status(500).json({ reply: "エラー：VercelにGEMINI_API_KEYが正しく読み込まれていません。" });
+    return res.status(500).json({ reply: "エラー：VercelにGEMINI_API_KEYが設定されていません。" });
   }
 
+  // フロントエンドからのデータを受け取る
   const { message, number, context } = req.body;
 
+  // データが欠損している場合のエラー処理
+  if (!number || !context) {
+    return res.status(400).json({ reply: "エラー：フロントエンドから「音」の数値データが正しく送られてきませんでした。" });
+  }
+
+  // AIへの指示書（プロンプト）
   const prompt = `あなたは「使命鑑定ナビ」の熟練鑑定士です。
 相談者の数秘（音）は「${number}」です。
 この数字の使命は「${context.m}」、エゴは「${context.e}」です。
@@ -34,22 +40,20 @@ module.exports = async function handler(req, res) {
       })
     });
 
-    if (!response.ok) {
-      return res.status(500).json({ reply: `Gemini通信エラーが発生しました: HTTPステータス ${response.status}` });
-    }
-
     const data = await response.json();
-    
-    // データ形式の安全チェック
-    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
-      return res.status(500).json({ reply: "エラー：Geminiからの返答データが空でした。" });
+
+    if (!response.ok) {
+      return res.status(500).json({ reply: `Gemini通信エラーが発生しました: ${data.error?.message || response.status}` });
     }
 
-    const reply = data.candidates[0].content.parts[0].text;
-    res.status(200).json({ reply });
+    if (data.candidates && data.candidates.length > 0) {
+      const reply = data.candidates[0].content.parts[0].text;
+      return res.status(200).json({ reply: reply });
+    } else {
+      return res.status(500).json({ reply: "エラー：Geminiからの返答が空でした。" });
+    }
 
   } catch (error) {
-    // サーバー内部で予期せぬエラーが起きた場合
-    res.status(500).json({ reply: `サーバー内部エラー: ${error.message}` });
+    return res.status(500).json({ reply: `サーバー内部エラー: ${error.message}` });
   }
 }
