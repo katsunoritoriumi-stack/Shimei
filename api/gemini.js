@@ -1,5 +1,4 @@
 export default async function handler(req, res) {
-  // POSTアクセス以外をブロック
   if (req.method !== 'POST') {
     return res.status(405).json({ reply: "エラー：POSTメソッドのみ許可されています。" });
   }
@@ -9,15 +8,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ reply: "エラー：VercelにGEMINI_API_KEYが設定されていません。" });
   }
 
-  // フロントエンドからのデータを受け取る
   const { message, number, context } = req.body;
 
-  // データが欠損している場合のエラー処理
   if (!number || !context) {
     return res.status(400).json({ reply: "エラー：フロントエンドから「音」のデータが正しく送られてきませんでした。" });
   }
 
-  // AIへの指示書（プロンプト）
   const prompt = `あなたは「使命鑑定ナビ」の熟練鑑定士です。
 相談者の数秘（音）は「${number}」です。
 この数字の使命は「${context.m}」、エゴは「${context.e}」です。
@@ -32,7 +28,8 @@ export default async function handler(req, res) {
 5. 「AI」や「システム」といった言葉は一切出さないでください。`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+    // ★ここが修正ポイントです（gemini-1.5-flash-latest に変更）
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
