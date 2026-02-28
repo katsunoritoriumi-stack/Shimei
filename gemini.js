@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // POST以外のアクセスを弾く
   if (req.method !== 'POST') {
     return res.status(405).json({ reply: "エラー：POSTメソッドのみ許可されています。" });
@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const API_KEY = process.env.GEMINI_API_KEY;
   // もしAPIキーがうまく読み込めていない場合のエラー
   if (!API_KEY) {
-    return res.status(500).json({ reply: "エラー：VercelにGEMINI_API_KEYが正しく読み込まれていません。Vercelの設定画面を確認してください。" });
+    return res.status(500).json({ reply: "エラー：VercelにGEMINI_API_KEYが正しく読み込まれていません。" });
   }
 
   const { message, number, context } = req.body;
@@ -34,9 +34,7 @@ export default async function handler(req, res) {
       })
     });
 
-    // Gemini側からエラーが返ってきた場合
     if (!response.ok) {
-      const errorText = await response.text();
       return res.status(500).json({ reply: `Gemini通信エラーが発生しました: HTTPステータス ${response.status}` });
     }
 
@@ -44,7 +42,7 @@ export default async function handler(req, res) {
     
     // データ形式の安全チェック
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts) {
-      return res.status(500).json({ reply: "エラー：Geminiからの返答データの形式が想定と異なります。" });
+      return res.status(500).json({ reply: "エラー：Geminiからの返答データが空でした。" });
     }
 
     const reply = data.candidates[0].content.parts[0].text;
