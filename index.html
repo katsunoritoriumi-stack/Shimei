@@ -193,3 +193,70 @@
         { transform: 'translate(0, 0) scale(1.2)', opacity: 1, offset: 0.8 },
         { transform: 'translate(0, 0) scale(1)', opacity: 1 }
       ], { duration: 700, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', fill: 'forwards' });
+      
+      setTimeout(createSparkles, 200);
+
+      calcArea.style.display = 'none';
+      kwMission.innerHTML = `<span style="color:#8eb1ff; font-weight:bold;">【使命】</span> ${keywordsData[total].m}`;
+      kwEgo.innerHTML = `<span style="color:#ffca28; font-weight:bold;">【エゴ】</span> ${keywordsData[total].e}`;
+      kwInfo.classList.add('visible');
+
+      addMessage(`鑑定が完了しました。あなたの「音」に刻まれた数字は「${total}」です。<br>この数字が示す使命をふまえ、あなたのお悩みについて深く読み解いていきましょう。具体的に気になっていることはありますか？`, 'app');
+    });
+
+    async function generateAIResponse(userText) {
+      const indicator = document.createElement('div');
+      indicator.className = 'typing-indicator';
+      indicator.innerHTML = '<span></span><span></span><span></span>';
+      chatContainer.appendChild(indicator);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          // サーバー側が受け取れる名前に変更
+          body: JSON.stringify({ 
+            userText: userText, 
+            currentNumber: currentNum 
+          })
+        });
+
+        const data = await response.json();
+        chatContainer.removeChild(indicator);
+
+        if (data.error) {
+          addMessage(`システム通信エラー: ${data.error}`, 'app');
+        } else if (data.text) {
+          addMessage(data.text, 'app');
+        } else {
+          addMessage(`予期せぬエラーが発生しました。`, 'app');
+        }
+
+      } catch (e) {
+        if (indicator.parentNode) chatContainer.removeChild(indicator);
+        addMessage(`通信プログラムのエラーです: ${e.message}`, 'app');
+      }
+    }
+
+    function addMessage(text, type) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${type}-message`;
+      msgDiv.innerHTML = text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight; 
+    }
+
+    document.getElementById('send-btn').onclick = () => {
+      const input = document.getElementById('chat-input');
+      if (!input.value.trim() || !currentNum) return;
+      addMessage(input.value, 'user');
+      const text = input.value;
+      input.value = '';
+      generateAIResponse(text);
+    };
+
+    document.getElementById('chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('send-btn').click(); });
+  </script>
+</body>
+</html>
