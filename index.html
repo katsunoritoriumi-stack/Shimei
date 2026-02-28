@@ -10,160 +10,105 @@
     :root {
       --primary-gradient: linear-gradient(135deg, #1A253A 0%, #3C5A99 100%); 
       --accent-gradient: linear-gradient(135deg, #D4AF37 0%, #b58900 100%); 
-      --soft-beige: #F5F1E9; 
-      --dusty-pink: #E1BEE7; 
       --gold-accent: #D4AF37; 
-      --navy-accent: #0D1B2A; 
       --app-bg: #FFFFFF;
       --text-main: #333333;
-      --text-user: #FFFFFF;
-      --border-soft: #DDE2E5;
       --transition-base: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     
     * { box-sizing: border-box; }
-    
     body {
       font-family: '游明朝', 'YuMincho', serif;
-      background: var(--soft-beige);
-      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDUwIDUwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNFMUJFRTciIGZpbGwtb3BhY2l0eT0iMC4xNSI+PHBhdGggZD0iTTUwIDUwSDVWNUg1MHZ4NUg1MFoiLz48L2c+PC9nPjwvc3ZnPg=='); 
+      background: #F5F1E9;
       margin: 0; display: flex; justify-content: center; align-items: center;
-      height: 100vh; overflow-x: hidden; width: 100vw; position: relative;
+      height: 100vh; width: 100vw; overflow: hidden;
     }
 
     .app-container {
       width: 100%; max-width: 500px; height: 98vh; background: var(--app-bg);
       display: flex; flex-direction: column; border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden;
-      border: 1px solid rgba(212, 175, 55, 0.2); position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; position: relative;
     }
-
-    @media (max-width: 480px) {
-      .app-container { height: 100dvh; border-radius: 0; border: none; }
-    }
-    
-    .congrats-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(26, 37, 58, 0.85); display: none;
-      justify-content: center; align-items: center; z-index: 1000;
-      opacity: 0; transition: opacity 0.5s;
-    }
-    .congrats-overlay.visible { display: flex; opacity: 1; }
-    .congrats-content { text-align: center; color: var(--gold-accent); font-family: 'Klee One', cursive; animation: congratsPop 1s ease-out; }
-    .congrats-text { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
-    .congrats-sparkles { font-size: 4rem; animation: sparkleRotate 2s linear infinite; }
-    
-    @keyframes congratsPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-    @keyframes sparkleRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     header {
-      background: var(--primary-gradient); color: #FFF; padding: 15px; 
-      text-align: center; position: relative; z-index: 10; transition: var(--transition-base);
+      background: var(--primary-gradient); color: #FFF; padding: 20px; 
+      text-align: center; position: relative; z-index: 10;
     }
-    header::after { content: ''; position: absolute; bottom: 0; left: 10%; width: 80%; height: 1px; background: var(--gold-accent); }
-    header h1 { margin: 0 0 10px 0; font-size: 1.4rem; font-family: 'Playfair Display', serif; display: flex; justify-content: center; align-items: center; }
-    .header-icon { font-size: 1.5rem; color: var(--gold-accent); margin-right: 8px; }
     
-    .calculator-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 5px; transition: var(--transition-base); }
-    .name-input-wrapper { position: relative; width: 85%; margin-top: 25px; transition: var(--transition-base); }
-    .name-input {
-      width: 100%; padding: 10px 18px; border: 2px solid var(--border-soft); border-radius: 30px;
-      text-align: center; outline: none; font-size: 1.1rem; transition: var(--transition-base); font-family: 'Klee One', cursive; 
+    /* 修正：数秘を右上へ配置 & 目出度い演出 */
+    .result-badge {
+      position: absolute; top: 10px; right: 15px;
+      background: var(--accent-gradient);
+      width: 70px; height: 70px; border-radius: 50%;
+      display: none; flex-direction: column; justify-content: center; align-items: center;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+      border: 2px solid #FFF;
+      animation: popCongrats 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .name-input-wrapper::after {
-      content: '＼ お名前（ひらがな）をどうぞ ／'; position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
-      font-size: 0.8rem; color: var(--gold-accent); font-family: 'Klee One', cursive; white-space: nowrap;
-      background: rgba(26, 37, 58, 0.8); padding: 2px 10px; border-radius: 10px;
+    .result-badge.visible { display: flex; }
+    .result-badge .num-val { font-size: 1.8rem; font-weight: bold; font-family: 'Playfair Display', serif; line-height: 1; }
+    .result-badge .num-label { font-size: 0.6rem; font-weight: bold; }
+
+    @keyframes popCongrats {
+      0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+      70% { transform: scale(1.2) rotate(10deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    .calculator-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 5px; }
+    .name-input {
+      width: 80%; padding: 10px 18px; border: 2px solid #DDE2E5; border-radius: 30px;
+      text-align: center; font-size: 1.1rem; font-family: 'Klee One', cursive; outline: none;
     }
     .calc-btn {
-      background: var(--navy-accent); color: var(--gold-accent); border: 1px solid var(--gold-accent);
-      padding: 8px 24px; border-radius: 20px; font-family: 'Playfair Display', 'YuMincho', serif;
-      font-size: 0.9rem; cursor: pointer; transition: var(--transition-base); display: flex; align-items: center; gap: 5px;
+      background: var(--gold-accent); color: #0D1B2A; border: none;
+      padding: 10px 25px; border-radius: 20px; font-weight: bold; cursor: pointer;
     }
-    .calc-btn:hover { background: var(--gold-accent); color: var(--navy-accent); }
-    
-    .calc-result { width: 85%; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; display: none; text-align: center; color: #FFF; border: 1px solid rgba(255,255,255,0.3); }
-    .calc-result.visible { display: block; animation: fadeIn 0.5s ease-out; }
-    .number-highlight { font-size: 1.5rem; color: var(--gold-accent); font-weight: bold; font-family: 'Playfair Display', serif; display: block; margin-bottom: 8px;}
 
-    /* 修正③：特有の使命・エゴ表示エリア */
-    .keyword-display { font-size: 0.8rem; line-height: 1.5; text-align: left; }
-    .keyword-display div { margin-bottom: 4px; }
-    .label-mission-small { color: #8eb1ff; font-weight: bold; }
-    .label-ego-small { color: #ffca28; font-weight: bold; }
-
-    header.compact { padding: 10px; }
-    header.compact h1 { display: none; }
-    header.compact .calculator-container { gap: 8px; margin-top: 0; }
-    header.compact .name-input-wrapper { margin-top: 0; max-width: 180px; }
-    header.compact .name-input-wrapper::after { display: none; }
-    header.compact .name-input { padding: 6px 12px; font-size: 1rem; }
-    header.compact .calc-btn { padding: 6px 15px; font-size: 0.8rem; }
-    header.compact .calc-result { width: 95%; }
-
-    #chat-container {
-      flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;
-      background: #FAFCFD; scroll-behavior: smooth;
+    /* 修正：キーワード表示のスタイル */
+    .keyword-info {
+      margin-top: 10px; font-size: 0.8rem; text-align: left; width: 85%;
+      background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; display: none;
     }
-    #chat-container::-webkit-scrollbar { width: 6px; }
-    #chat-container::-webkit-scrollbar-thumb { background-color: #DDE2E5; border-radius: 10px; }
+    .keyword-info.visible { display: block; }
 
-    .pinned-question {
-      position: sticky; top: 0; background: rgba(255, 255, 255, 0.95);
-      padding: 10px 15px; border-bottom: 2px solid var(--gold-accent);
-      z-index: 50; margin: -15px -15px 15px -15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: none; backdrop-filter: blur(5px);
-    }
-    .pinned-label { font-size: 0.75rem; color: var(--navy-accent); font-weight: bold; margin-bottom: 4px; font-family: 'Klee One', cursive;}
-    .pinned-text { font-size: 0.9rem; color: var(--text-main); font-weight: bold; }
+    #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; background: #FAFCFD; }
+    .message { max-width: 90%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.6; animation: fadeIn 0.4s ease-out; }
+    .user-message { align-self: flex-end; background: var(--primary-gradient); color: #FFF; border-bottom-right-radius: 4px; }
+    .app-message { align-self: flex-start; background: #FFF; border: 1px solid #EEF2F5; border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
 
-    .message {
-      max-width: 90%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem;
-      line-height: 1.6; word-wrap: break-word; animation: fadeIn 0.4s ease-out;
-    }
-    .user-message { align-self: flex-end; background: var(--primary-gradient); color: var(--text-user); border-bottom-right-radius: 4px; border: 1px solid var(--gold-accent); }
-    .app-message { align-self: flex-start; background: #FFF; border: 1px solid #EEF2F5; color: var(--text-main); border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-    
-    .typing-indicator { align-self: flex-start; display: flex; gap: 5px; padding: 12px 18px; background: #FFF; border: 1px solid #EEF2F5; border-radius: 20px; border-bottom-left-radius: 4px; }
-    .typing-indicator span { width: 6px; height: 6px; background: #BDC3C7; border-radius: 50%; animation: bounce 1.4s infinite; }
-    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .input-area { display: flex; padding: 12px; border-top: 1px solid #EEF2F5; gap: 8px; background: #FFF; }
+    #chat-input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #E5E8E8; outline: none; }
+    #send-btn { background: var(--accent-gradient); color: #FFF; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; }
 
-    .input-area { display: flex; padding: 12px; border-top: 1px solid #EEF2F5; gap: 8px; background: #FFF; z-index: 10; }
-    #chat-input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #E5E8E8; outline: none; font-size: 0.95rem; }
-    #send-btn { background: var(--accent-gradient); color: #FFF; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
   </style>
 </head>
 <body>
-  <div id="congrats-overlay" class="congrats-overlay">
-    <div class="congrats-content">
-      <div class="congrats-sparkles"><i class="fas fa-magic"></i></div>
-      <div class="congrats-text">おめでとう！</div>
-      <div class="congrats-subtext">あなたの「音」が見つかりました</div>
-    </div>
-  </div>
-
   <div class="app-container">
     <header id="main-header">
-      <h1><i class="fas fa-gem header-icon"></i>使命鑑定ナビ</h1>
-      <div class="calculator-container">
-        <div class="name-input-wrapper">
-          <input type="text" id="name-input" class="name-input" placeholder="なまえ（ひらがな）" autocomplete="off">
-        </div>
+      <h1 id="header-title" style="margin:0; font-size:1.2rem;"><i class="fas fa-gem"></i> 使命鑑定ナビ</h1>
+      
+      <div id="result-badge" class="result-badge">
+        <span class="num-label">あなたの音</span>
+        <span id="num-val" class="num-val"></span>
+      </div>
+
+      <div class="calculator-container" id="calc-area">
+        <input type="text" id="name-input" class="name-input" placeholder="お名前をひらがなで">
         <button id="calc-btn" class="calc-btn"><i class="fas fa-sparkles"></i> 音を導き出す</button>
-        <div id="calc-result" class="calc-result">
-          <span id="number-title" class="number-highlight"></span>
-          <div id="keyword-summary" class="keyword-display"></div>
-        </div>
+      </div>
+
+      <div id="keyword-info" class="keyword-info">
+        <div id="kw-mission" style="margin-bottom:5px;"></div>
+        <div id="kw-ego"></div>
       </div>
     </header>
     
     <div id="chat-container">
-      <div id="pinned-question" class="pinned-question">
-        <div class="pinned-label"><i class="fas fa-pen-nib"></i> あなたの相談内容</div>
-        <div id="pinned-text" class="pinned-text"></div>
+      <div id="welcome-msg" class="message app-message">
+        こんにちは。<br>あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br>まずはお名前をひらがなで入力してください。
       </div>
-      <div class="message app-message">こんにちは。<br>あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br>まずはお名前をひらがなで入力し、「音を導き出す」ボタンを押してください。</div>
     </div>
     
     <div class="input-area">
@@ -173,116 +118,82 @@
   </div>
 
   <script>
-    const charValues = {
-      'あ':18,'い':5,'う':19,'え':43,'お':40,'か':25,'き':29,'く':11,'け':35,'こ':16,'さ':28,'し':23,'す':21,'せ':36,'そ':30,'た':26,'ち':27,'つ':44,'て':9,'と':17,'な':14,'に':32,'ぬ':39,'ね':46,'の':20,'は':42,'ひ':1,'ふ':2,'へ':22,'ほ':47,'ま':6,'み':3,'む':13,'め':10,'も':33,'や':15,'ゆ':37,'よ':4,'ら':31,'り':8,'る':12,'れ':24,'ろ':34,'わ':7,'ん':48,
-      'が':25,'ぎ':29,'ぐ':11,'げ':35,'ご':16,'ざ':28,'じ':23,'ず':21,'ぜ':36,'ぞ':30,'だ':26,'ぢ':27,'づ':44,'で':9,'ど':17,'ば':42,'び':1,'ぶ':2,'べ':22,'ぼ':47,'ぱ':42,'ぴ':1,'ぷ':2,'ぺ':22,'ぽ':47
-    };
-
+    const charValues = {'あ':18,'い':5,'う':19,'え':43,'お':40,'か':25,'き':29,'く':11,'け':35,'こ':16,'さ':28,'し':23,'す':21,'せ':36,'そ':30,'た':26,'ち':27,'つ':44,'て':9,'と':17,'な':14,'に':32,'ぬ':39,'ね':46,'の':20,'は':42,'ひ':1,'ふ':2,'へ':22,'ほ':47,'ま':6,'み':3,'む':13,'め':10,'も':33,'や':15,'ゆ':37,'よ':4,'ら':31,'り':8,'る':12,'れ':24,'ろ':34,'わ':7,'ん':48,'が':25,'ぎ':29,'ぐ':11,'げ':35,'ご':16,'ざ':28,'じ':23,'ず':21,'ぜ':36,'ぞ':30,'だ':26,'ぢ':27,'づ':44,'で':9,'ど':17,'ば':42,'び':1,'ぶ':2,'べ':22,'ぼ':47,'ぱ':42,'ぴ':1,'ぷ':2,'ぺ':22,'ぽ':47};
     const keywordsData = {
-      1: { mission: "本質・本物・根源・懸け橋・要点・決断", ego: "迷走・保留・依頼心・複雑・諦め", desc: "あなたは物事の核心を見抜き、新しい道を切り拓くリーダーの資質を持っています。" },
-      2: { mission: "整理・要約・適格・順序・共感・親切・指導", ego: "雑・散漫・反発・慢心・優越感・逆行", desc: "周囲を調和させ、複雑な状況を整えることで、人々に安心と導きを与える存在です。" },
-      3: { mission: "具現・学習・技術・結果・客観力・地道・形", ego: "無気力・憔悴・逃避・疲労・他人軸・口先", desc: "学んだことを形にする力が強く、地道な努力を成果へと変える才能があります。" },
-      4: { mission: "語彙力・経験・体験・旅・世・自然・質問・希望", ego: "長話・孤独・停止・静観・落胆", desc: "豊かな言葉と経験を通じて、世界に希望を伝える旅人のような使命を持っています。" },
-      5: { mission: "音・文・響・芸・話・表情・情報・発信・広域", ego: "噂・悪口・疑心・秘密・否定・隠蔽", desc: "自己を表現し、情報を広く伝えることで、多くの人の心に響きをもたらします。" },
-      6: { mission: "察知・提供・準備・先見・優しさ・安心", ego: "強欲・見返り・損得・慢心・傲慢・我", desc: "一歩先を察し、献身的に準備を整えることで、周囲に癒やしと豊かさを提供します。" },
-      7: { mission: "同調・保護・育成・沈着・丁寧・平和", ego: "差別・批判・正義・強気・緊張・焦り・適当・搾取", desc: "他者に寄り添い、育むことで、平和で穏やかな環境を作り出す保護者のような存在です。" },
-      8: { mission: "哲学・追求・美学・誇り・直感・自立・行動", ego: "利己・理屈・狡猾・虚栄・誇張", desc: "自身の美学を追求し、直感に従って行動することで、孤高の道を切り拓きます。" },
-      9: { mission: "意外・芸術・言葉・数字・気力・爆発", ego: "怠惰・批判・我慢・静止・怒り・放置・執着", desc: "常識にとらわれない発想と圧倒的な気力で、新しい価値や芸術を生み出します。" }
+      1: { m: "本質・本物・根源", e: "迷走・保留・依頼心", d: "あなたは物事の核心を見抜き、新しい道を切り拓くリーダーの資質を持っています。" },
+      2: { m: "整理・要約・適格", e: "雑・散漫・慢心", d: "周囲を調和させ、複雑な状況を整えることで、人々に安心を与える存在です。" },
+      3: { m: "具現・学習・技術", e: "無気力・憔悴・逃避", d: "学んだことを形にする力が強く、地道な努力を成果へと変える才能があります。" },
+      4: { m: "語彙力・経験・体験", e: "長話・孤独・停止", d: "豊かな言葉と経験を通じて、世界に希望を伝える旅人のような使命を持っています。" },
+      5: { m: "音・文・響・芸", e: "噂・悪口・疑心", d: "自己を表現し、情報を広く伝えることで、多くの人の心に響きをもたらします。" },
+      6: { m: "察知・提供・準備", e: "強欲・見返り・損得", d: "一歩先を察し、献身的に準備を整えることで、周囲に癒やしと豊かさを提供します。" },
+      7: { m: "同調・保護・育成", e: "差別・批判・強気", d: "他者に寄り添い、育むことで、平和で穏やかな環境を作り出す保護者です。" },
+      8: { m: "哲学・追求・美学", e: "利己・理屈・虚栄", d: "自身の美学を追求し、直感に従って行動することで、孤高の道を切り拓きます。" },
+      9: { m: "意外・芸術・言葉", e: "怠惰・批判・執着", d: "常識にとらわれない発想と圧倒的な気力で、新しい価値を生み出す芸術家です。" }
     };
 
-    const congratsOverlay = document.getElementById('congrats-overlay');
-    const mainHeader = document.getElementById('main-header');
     const nameInput = document.getElementById('name-input');
     const calcBtn = document.getElementById('calc-btn');
-    const calcResult = document.getElementById('calc-result');
-    const numberTitle = document.getElementById('number-title');
-    const keywordSummary = document.getElementById('keyword-summary');
     const chatContainer = document.getElementById('chat-container');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-    const pinnedQuestion = document.getElementById('pinned-question');
-    const pinnedText = document.getElementById('pinned-text');
-    
-    let currentNumber = null;
+    const welcomeMsg = document.getElementById('welcome-msg');
+    const resultBadge = document.getElementById('result-badge');
+    const numVal = document.getElementById('num-val');
+    const kwInfo = document.getElementById('keyword-info');
+    const kwMission = document.getElementById('kw-mission');
+    const kwEgo = document.getElementById('kw-ego');
+    const calcArea = document.getElementById('calc-area');
+    const headerTitle = document.getElementById('header-title');
+
+    let currentNum = null;
 
     calcBtn.addEventListener('click', () => {
       const name = nameInput.value.replace(/[^ぁ-んが-ぼぱ-ぽ]/g, '');
       if (!name) return;
       
-      let sum = 0;
-      for (let c of name) { if (charValues[c] !== undefined) sum += charValues[c]; }
-      let total = Math.abs(sum);
+      let total = 0;
+      for (let c of name) { total += charValues[c] || 0; }
+      total = Math.abs(total);
       while (total >= 10) { total = total.toString().split('').map(Number).reduce((a,b)=>a+b, 0); }
       
-      if (currentNumber !== total) {
-        currentNumber = total;
-        const data = keywordsData[total];
-        
-        // ヘッダー結果の更新
-        numberTitle.innerText = `${total}の音`;
-        keywordSummary.innerHTML = `
-          <div><span class="label-mission-small">【使命】</span> ${data.mission}</div>
-          <div><span class="label-ego-small">【エゴ】</span> ${data.ego}</div>
-        `;
-        calcResult.classList.add('visible');
-        showCongratsAnimation(); 
-        
-        // 修正②：鑑定後に詳しいメッセージを出す
-        setTimeout(() => {
-          addMessage(`鑑定の結果、あなたの音は「${total}」と出ました。\n\n${data.desc}\n今、あなたが抱えているお悩みに対して、この「音」がどう導いてくれるのか一緒に読み解きましょう。何か具体的に気になっていることはありますか？`, 'app');
-        }, 1600);
-      }
-      mainHeader.classList.add('compact');
-    });
+      currentNum = total;
+      const data = keywordsData[total];
 
-    function showCongratsAnimation() {
-      congratsOverlay.classList.add('visible');
-      setTimeout(() => { congratsOverlay.classList.remove('visible'); }, 1500);
-    }
+      // 修正：初期案内文を削除
+      if (welcomeMsg) welcomeMsg.remove();
+      
+      // 修正：右上に数秘を大きく表示（演出付き）
+      numVal.innerText = total;
+      resultBadge.classList.add('visible');
+      
+      // ヘッダーのコンパクト化とキーワード提示
+      headerTitle.style.textAlign = 'left';
+      calcArea.style.display = 'none';
+      kwMission.innerHTML = `<span style="color:#8eb1ff; font-weight:bold;">【使命】</span> ${data.m}`;
+      kwEgo.innerHTML = `<span style="color:#ffca28; font-weight:bold;">【エゴ】</span> ${data.e}`;
+      kwInfo.classList.add('visible');
+
+      // 鑑定結果メッセージ
+      addMessage(`鑑定の結果、あなたの音は「${total}」と出ました。<br><br>${data.d}<br>この結果をふまえて、今のお悩みについてお話ししましょう。`, 'app');
+    });
 
     function addMessage(text, type) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `message ${type}-message`;
-      msgDiv.innerHTML = text.replace(/\n/g, '<br>');
+      msgDiv.innerHTML = text;
       chatContainer.appendChild(msgDiv);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    async function generateAIResponse(userText) {
-      const indicator = document.createElement('div');
-      indicator.className = 'typing-indicator';
-      indicator.innerHTML = '<span></span><span></span><span></span>';
-      chatContainer.appendChild(indicator);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      try {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userText, number: currentNumber, context: keywordsData[currentNumber] })
-        });
-        const data = await response.json();
-        chatContainer.removeChild(indicator);
-        addMessage(data.reply, 'app');
-      } catch (e) {
-        if (indicator.parentNode) chatContainer.removeChild(indicator);
-        addMessage(`あなたの「${currentNumber}の音」の視点から考えると、そのお悩みには『${keywordsData[currentNumber].mission.split('・')[0]}』の意識が鍵になるかもしれません。\n\nより深いメッセージを受け取るには、サーバー連携が必要です。`, 'app');
-      }
-    }
-
-    sendBtn.addEventListener('click', () => {
-      const text = chatInput.value.trim();
-      if (!text || !currentNumber) return;
-      if (pinnedQuestion.style.display === 'none' || !pinnedQuestion.style.display) {
-        pinnedText.innerText = text;
-        pinnedQuestion.style.display = 'block';
-      }
-      addMessage(text, 'user');
-      chatInput.value = '';
-      generateAIResponse(text);
-    });
-
-    chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendBtn.click(); });
+    document.getElementById('send-btn').onclick = () => {
+      const input = document.getElementById('chat-input');
+      if (!input.value.trim() || !currentNum) return;
+      addMessage(input.value, 'user');
+      input.value = '';
+      
+      // 仮の返答（サーバー連携の言葉を排除）
+      setTimeout(() => {
+        addMessage(`あなたの「${currentNum}の音」の視点からお答えします。今の状況において大切にすべきなのは、エゴを抑え『${keywordsData[currentNum].m.split('・')[0]}』に立ち返ることかもしれません。`, 'app');
+      }, 800);
+    };
   </script>
 </body>
 </html>
