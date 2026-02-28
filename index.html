@@ -35,11 +35,11 @@
     
     #header-title { margin:0 0 10px 0; font-size:1.4rem; display: flex; align-items: center; gap: 8px; }
 
-    /* ★修正：数字をさらに巨大化し、位置を中央寄りに調整 */
+    /* 数字バッジ：巨大化・中央寄り配置・青い箱に被せる */
     .result-badge {
       position: absolute; 
-      top: 45px; /* 青い箱のラインに合わせる */
-      right: 40px; /* 右端から少し離して左へ寄せる */
+      top: 45px; 
+      right: 40px; 
       background: var(--accent-gradient);
       width: 120px; height: 120px; border-radius: 50%;
       display: none; flex-direction: column; justify-content: center; align-items: center;
@@ -52,7 +52,7 @@
     .result-badge .num-val { font-size: 4rem; font-weight: bold; font-family: 'Playfair Display', serif; line-height: 1; color: #FFF; text-shadow: 0 3px 6px rgba(0,0,0,0.3); }
     .result-badge .num-label { font-size: 0.8rem; font-weight: bold; color: #FFF; margin-bottom: -5px; letter-spacing: 0.1em;}
 
-    /* スパーク演出 */
+    /* スパーク演出用 */
     .sparkle {
       position: absolute; background: #FFF; border-radius: 50%; pointer-events: none;
       box-shadow: 0 0 10px #D4AF37;
@@ -73,10 +73,9 @@
       padding: 12px 35px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 1rem;
     }
 
-    /* 使命・エゴのテキストエリアの幅を調整して数字と被せる */
     .keyword-info {
       margin-top: 5px; font-size: 0.9rem; text-align: left; 
-      width: 75%; /* 数字のスペースを空ける */
+      width: 75%; 
       background: rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; display: none;
       position: relative; z-index: 10;
     }
@@ -86,6 +85,10 @@
     .message { max-width: 90%; padding: 15px 20px; border-radius: 20px; font-size: 0.95rem; line-height: 1.6; animation: fadeIn 0.4s ease-out; }
     .app-message { align-self: flex-start; background: #FFF; border: 1px solid #EEF2F5; border-bottom-left-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .user-message { align-self: flex-end; background: var(--primary-gradient); color: #FFF; border-bottom-right-radius: 4px; }
+
+    .typing-indicator { align-self: flex-start; display: flex; gap: 5px; padding: 12px 18px; background: #FFF; border: 1px solid #EEF2F5; border-radius: 20px; border-bottom-left-radius: 4px; }
+    .typing-indicator span { width: 6px; height: 6px; background: #BDC3C7; border-radius: 50%; animation: bounce 1.4s infinite; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
     .input-area { display: flex; padding: 15px; border-top: 1px solid #EEF2F5; gap: 10px; background: #FFF; }
     #chat-input { flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid #E5E8E8; outline: none; }
@@ -118,7 +121,7 @@
     
     <div id="chat-container">
       <div id="welcome-msg" class="message app-message">
-        こんにちは。<br>あなたの「音」に刻まれた使命を解き明かします。<br>お名前を入力してボタンを押してください。
+        こんにちは。<br>あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br>まずはお名前をひらがなで入力し、「音を導き出す」ボタンを押してください。
       </div>
     </div>
     
@@ -131,15 +134,15 @@
   <script>
     const charValues = {'あ':18,'い':5,'う':19,'え':43,'お':40,'か':25,'き':29,'く':11,'け':35,'こ':16,'さ':28,'し':23,'す':21,'せ':36,'そ':30,'た':26,'ち':27,'つ':44,'て':9,'と':17,'な':14,'に':32,'ぬ':39,'ね':46,'の':20,'は':42,'ひ':1,'ふ':2,'へ':22,'ほ':47,'ま':6,'み':3,'む':13,'め':10,'も':33,'や':15,'ゆ':37,'よ':4,'ら':31,'り':8,'る':12,'れ':24,'ろ':34,'わ':7,'ん':48,'が':25,'ぎ':29,'ぐ':11,'げ':35,'ご':16,'ざ':28,'じ':23,'ず':21,'ぜ':36,'ぞ':30,'だ':26,'ぢ':27,'づ':44,'で':9,'ど':17,'ば':42,'び':1,'ぶ':2,'べ':22,'ぼ':47,'ぱ':42,'ぴ':1,'ぷ':2,'ぺ':22,'ぽ':47};
     const keywordsData = {
-      1: { m: "本質・本物・根源", e: "迷走・保留・依頼心", d: "核心を見抜き、新しい道を切り拓くリーダーの資質。" },
-      2: { m: "整理・要約・適格", e: "雑・散漫・慢心", d: "周囲を調和させ、安心と明確な指針を与える存在。" },
-      3: { m: "具現・学習・技術", e: "無気力・憔悴・逃避", d: "地道な努力を成果へと変え、形にする才能。" },
-      4: { m: "語彙力・経験・体験", e: "長話・孤独・停止", d: "豊かな言葉で世界に希望を伝える旅人のような使命。" },
-      5: { m: "音・文・響・芸", e: "噂・悪口・疑心", d: "自己を表現し、多くの人の心に響きをもたらす表現者。" },
-      6: { m: "察知・提供・準備", e: "強欲・見返り・損得", d: "一歩先を察し、献身的に周囲へ癒やしを提供する存在。" },
-      7: { m: "同調・保護・育成", e: "差別・批判・強気", d: "他者に寄り添い、育むことで平和な環境を作る保護者。" },
-      8: { m: "哲学・追求・美学", e: "利己・理屈・虚栄", d: "自身の美学を追求し、直感で道を切り拓く自立心。" },
-      9: { m: "意外・芸術・言葉", e: "怠惰・批判・執着", d: "常識にとらわれない発想で新しい価値を生む芸術家。" }
+      1: { m: "本質・本物・根源", e: "迷走・保留・依頼心" },
+      2: { m: "整理・要約・適格", e: "雑・散漫・慢心" },
+      3: { m: "具現・学習・技術", e: "無気力・憔悴・逃避" },
+      4: { m: "語彙力・経験・体験", e: "長話・孤独・停止" },
+      5: { m: "音・文・響・芸", e: "噂・悪口・疑心" },
+      6: { m: "察知・提供・準備", e: "強欲・見返り・損得" },
+      7: { m: "同調・保護・育成", e: "差別・批判・強気" },
+      8: { m: "哲学・追求・美学", e: "利己・理屈・虚栄" },
+      9: { m: "意外・芸術・言葉", e: "怠惰・批判・執着" }
     };
 
     const nameInput = document.getElementById('name-input');
@@ -153,6 +156,8 @@
     const kwMission = document.getElementById('kw-mission');
     const kwEgo = document.getElementById('kw-ego');
     const calcArea = document.getElementById('calc-area');
+
+    let currentNum = null;
 
     function createSparkles() {
       sparkleContainer.innerHTML = '';
@@ -180,11 +185,11 @@
       total = Math.abs(total);
       while (total >= 10) { total = total.toString().split('').map(Number).reduce((a,b)=>a+b, 0); }
       
+      currentNum = total;
       if (welcomeMsg) welcomeMsg.remove();
       numVal.innerText = total;
       resultBadge.classList.add('visible');
       
-      // 出現アニメーション
       resultBadge.animate([
         { transform: 'translate(50px, -50px) scale(0)', opacity: 0 },
         { transform: 'translate(0, 0) scale(1.2)', opacity: 1, offset: 0.8 },
@@ -198,10 +203,41 @@
       kwEgo.innerHTML = `<span style="color:#ffca28; font-weight:bold;">【エゴ】</span> ${keywordsData[total].e}`;
       kwInfo.classList.add('visible');
 
-      setTimeout(() => {
-        addMessage(`あなたの「音」は「${total}」です。<br><br>${keywordsData[total].d}<br>何か具体的に気になることはありますか？`, 'app');
-      }, 1000);
+      // 初期鑑定メッセージ（AIではない固定文ですが、次からAIになります）
+      addMessage(`鑑定が完了しました。あなたの「音」に刻まれた数字は「${total}」です。<br>この数字が示す使命をふまえ、あなたのお悩みについて深く読み解いていきましょう。具体的に気になっていることはありますか？`, 'app');
     });
+
+    async function generateAIResponse(userText) {
+      const indicator = document.createElement('div');
+      indicator.className = 'typing-indicator';
+      indicator.innerHTML = '<span></span><span></span><span></span>';
+      chatContainer.appendChild(indicator);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: userText, 
+            number: currentNum, 
+            context: {
+              m: keywordsData[currentNum].m,
+              e: keywordsData[currentNum].e
+            }
+          })
+        });
+
+        if (!response.ok) throw new Error('API通信失敗');
+        const data = await response.json();
+        chatContainer.removeChild(indicator);
+        addMessage(data.reply, 'app');
+
+      } catch (e) {
+        if (indicator.parentNode) chatContainer.removeChild(indicator);
+        addMessage("星の導きがうまく届かなかったようです。Vercelの環境変数設定を再確認してください。", 'app');
+      }
+    }
 
     function addMessage(text, type) {
       const msgDiv = document.createElement('div');
@@ -213,13 +249,14 @@
 
     document.getElementById('send-btn').onclick = () => {
       const input = document.getElementById('chat-input');
-      if (!input.value.trim()) return;
+      if (!input.value.trim() || !currentNum) return;
       addMessage(input.value, 'user');
+      const text = input.value;
       input.value = '';
-      setTimeout(() => {
-        addMessage(`あなたの数字の視点から考えると、そのお悩みは今の資質を活かすチャンスかもしれませんね。`, 'app');
-      }, 1200);
+      generateAIResponse(text);
     };
+
+    document.getElementById('chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') document.getElementById('send-btn').click(); });
   </script>
 </body>
 </html>
