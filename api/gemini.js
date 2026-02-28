@@ -1,18 +1,15 @@
 export default async function handler(req, res) {
-  // 1. メソッドチェック
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'POSTメソッドのみ許可されています' });
   }
 
   const { userText, currentNumber } = req.body;
-
-  // 2. 環境変数の取得とチェック
   const apiKey = process.env.GEMINI_API_KEY;
+
   if (!apiKey) {
     return res.status(500).json({ error: 'サーバー側にAPIキーが設定されていません。VercelのSettingsから設定してください。' });
   }
 
-  // 3. 数秘データの定義
   const numerologyData = {
     "1": { mission: "求める根源：本質・本物・根源・懸け橋・要点・決断", ego: "答えを探す：迷走・保留・依頼心・複雑・諦め" },
     "2": { mission: "助け合う心：整理・要約・適格・順序・共感・親切・指導", ego: "興奮と反感：雑・散漫・反発・慢心・優越感・逆行" },
@@ -30,7 +27,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: '有効な数秘（1〜9）が指定されていません。' });
   }
 
-  // 4. プロンプトの構築
   const prompt = `あなたは数秘術とカタカムナ音霊鑑定の奥義を極めた、慈愛に満ちた熟練カウンセラーです。
 ユーザーは「${currentNumber}の音」の持ち主です。
 
@@ -45,9 +41,8 @@ export default async function handler(req, res) {
 3. 本来の「使命」の力を取り戻し、どう乗り越えるべきか具体的に導いてください。`;
 
   try {
-    // 5. モデル名を現行の安定版 'gemini-1.5-flash' に修正
-    // 変更後
-const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+    // ★ 安定版の「gemini-2.0-flash」に変更
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -55,7 +50,8 @@ const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-fl
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          maxOutputTokens: 800,
+          // ★ AIが話せる文字数の限界を「2000」に大幅アップ
+          maxOutputTokens: 2000,
           temperature: 0.7,
         }
       })
@@ -68,7 +64,6 @@ const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-fl
       return res.status(response.status).json({ error: result.error?.message || 'Gemini APIとの通信に失敗しました' });
     }
 
-    // 6. レスポンスの抽出
     const aiResponseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!aiResponseText) {
