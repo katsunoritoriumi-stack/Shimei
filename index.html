@@ -82,25 +82,24 @@
     }
     .calc-btn:hover { background: var(--gold-accent); color: var(--navy-accent); }
     
-    .calc-result { width: 85%; background: rgba(255,255,255,0.25); border-radius: 12px; padding: 8px; font-size: 0.85rem; display: none; text-align: center; color: #FFF; border: 1px solid rgba(255,255,255,0.4); font-family: 'Playfair Display', serif; }
+    .calc-result { width: 85%; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; display: none; text-align: center; color: #FFF; border: 1px solid rgba(255,255,255,0.3); }
     .calc-result.visible { display: block; animation: fadeIn 0.5s ease-out; }
-    .number-highlight { font-size: 1.3rem; color: var(--gold-accent); font-weight: bold; }
+    .number-highlight { font-size: 1.5rem; color: var(--gold-accent); font-weight: bold; font-family: 'Playfair Display', serif; display: block; margin-bottom: 8px;}
 
-    .keyword-btn {
-      background: transparent; border: 1px solid rgba(255,255,255,0.6); color: #FFF;
-      padding: 4px 12px; border-radius: 15px; font-size: 0.75rem; cursor: pointer;
-      margin-top: 5px; display: none; transition: var(--transition-base);
-    }
-    
+    /* 修正③：特有の使命・エゴ表示エリア */
+    .keyword-display { font-size: 0.8rem; line-height: 1.5; text-align: left; }
+    .keyword-display div { margin-bottom: 4px; }
+    .label-mission-small { color: #8eb1ff; font-weight: bold; }
+    .label-ego-small { color: #ffca28; font-weight: bold; }
+
     header.compact { padding: 10px; }
     header.compact h1 { display: none; }
-    header.compact .calculator-container { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 0; }
-    header.compact .name-input-wrapper { margin-top: 0; width: auto; flex: 1; max-width: 140px; }
+    header.compact .calculator-container { gap: 8px; margin-top: 0; }
+    header.compact .name-input-wrapper { margin-top: 0; max-width: 180px; }
     header.compact .name-input-wrapper::after { display: none; }
-    header.compact .name-input { padding: 6px 10px; font-size: 0.9rem; }
-    header.compact .calc-btn { padding: 6px 12px; font-size: 0.8rem; }
-    header.compact .calc-result { width: 100%; margin-top: 0; padding: 4px; font-size: 0.8rem; }
-    header.compact .keyword-btn { display: block; }
+    header.compact .name-input { padding: 6px 12px; font-size: 1rem; }
+    header.compact .calc-btn { padding: 6px 15px; font-size: 0.8rem; }
+    header.compact .calc-result { width: 95%; }
 
     #chat-container {
       flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px;
@@ -116,15 +115,14 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: none; backdrop-filter: blur(5px);
     }
     .pinned-label { font-size: 0.75rem; color: var(--navy-accent); font-weight: bold; margin-bottom: 4px; font-family: 'Klee One', cursive;}
+    .pinned-text { font-size: 0.9rem; color: var(--text-main); font-weight: bold; }
 
     .message {
-      max-width: 95%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem;
-      line-height: 1.6; word-wrap: break-word; overflow-wrap: anywhere;
-      animation: fadeIn 0.4s ease-out;
+      max-width: 90%; padding: 14px 18px; border-radius: 18px; font-size: 0.95rem;
+      line-height: 1.6; word-wrap: break-word; animation: fadeIn 0.4s ease-out;
     }
     .user-message { align-self: flex-end; background: var(--primary-gradient); color: var(--text-user); border-bottom-right-radius: 4px; border: 1px solid var(--gold-accent); }
     .app-message { align-self: flex-start; background: #FFF; border: 1px solid #EEF2F5; color: var(--text-main); border-bottom-left-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-    .system-message { align-self: center; background: #FFF3CD; color: #856404; padding: 8px 16px; border-radius: 15px; font-size: 0.8rem; border: 1px solid var(--gold-accent); }
     
     .typing-indicator { align-self: flex-start; display: flex; gap: 5px; padding: 12px 18px; background: #FFF; border: 1px solid #EEF2F5; border-radius: 20px; border-bottom-left-radius: 4px; }
     .typing-indicator span { width: 6px; height: 6px; background: #BDC3C7; border-radius: 50%; animation: bounce 1.4s infinite; }
@@ -134,23 +132,6 @@
     .input-area { display: flex; padding: 12px; border-top: 1px solid #EEF2F5; gap: 8px; background: #FFF; z-index: 10; }
     #chat-input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #E5E8E8; outline: none; font-size: 0.95rem; }
     #send-btn { background: var(--accent-gradient); color: #FFF; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-    /* モーダル */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); z-index: 2000; display: none;
-      justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
-    }
-    .modal-overlay.visible { display: flex; opacity: 1; }
-    .modal-content {
-      background: #FFF; width: 90%; max-width: 450px; max-height: 80vh;
-      border-radius: 20px; padding: 25px; overflow-y: auto; position: relative;
-    }
-    .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
-    .keyword-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #E5E8E8; }
-    .keyword-item h3 { margin: 0 0 5px 0; color: var(--gold-accent); }
-    .label-mission { font-weight: bold; color: #3C5A99; }
-    .label-ego { font-weight: bold; color: #b58900; }
   </style>
 </head>
 <body>
@@ -162,24 +143,18 @@
     </div>
   </div>
 
-  <div id="keywords-modal" class="modal-overlay">
-    <div class="modal-content">
-      <button id="close-modal" class="close-btn"><i class="fas fa-times"></i></button>
-      <h2 style="text-align:center; font-family:'Playfair Display', serif; border-bottom: 2px solid #D4AF37; padding-bottom:10px;">数秘キーワード一覧</h2>
-      <div id="keywords-list-container"></div>
-    </div>
-  </div>
-
   <div class="app-container">
     <header id="main-header">
       <h1><i class="fas fa-gem header-icon"></i>使命鑑定ナビ</h1>
       <div class="calculator-container">
         <div class="name-input-wrapper">
-          <input type="text" id="name-input" class="name-input" placeholder="" autocomplete="off">
+          <input type="text" id="name-input" class="name-input" placeholder="なまえ（ひらがな）" autocomplete="off">
         </div>
         <button id="calc-btn" class="calc-btn"><i class="fas fa-sparkles"></i> 音を導き出す</button>
-        <div id="calc-result" class="calc-result"></div>
-        <button id="open-keywords-btn" class="keyword-btn"><i class="fas fa-book-open"></i> 全てのキーワードを見る</button>
+        <div id="calc-result" class="calc-result">
+          <span id="number-title" class="number-highlight"></span>
+          <div id="keyword-summary" class="keyword-display"></div>
+        </div>
       </div>
     </header>
     
@@ -203,54 +178,36 @@
       'が':25,'ぎ':29,'ぐ':11,'げ':35,'ご':16,'ざ':28,'じ':23,'ず':21,'ぜ':36,'ぞ':30,'だ':26,'ぢ':27,'づ':44,'で':9,'ど':17,'ば':42,'び':1,'ぶ':2,'べ':22,'ぼ':47,'ぱ':42,'ぴ':1,'ぷ':2,'ぺ':22,'ぽ':47
     };
 
-    const keywordsData = [
-      { num: 1, mission: "本質・本物・根源・懸け橋・要点・決断", ego: "迷走・保留・依頼心・複雑・諦め" },
-      { num: 2, mission: "整理・要約・適格・順序・共感・親切・指導", ego: "雑・散漫・反発・慢心・優越感・逆行" },
-      { num: 3, mission: "具現・学習・技術・結果・客観力・地道・形", ego: "無気力・憔悴・逃避・疲労・他人軸・口先" },
-      { num: 4, mission: "語彙力・経験・体験・旅・世・自然・質問・希望", ego: "長話・孤独・停止・静観・落胆" },
-      { num: 5, mission: "音・文・響・芸・話・表情・情報・発信・広域", ego: "噂・悪口・疑心・秘密・否定・隠蔽" },
-      { num: 6, mission: "察知・提供・準備・先見・優しさ・安心", ego: "強欲・見返り・損得・慢心・傲慢・我" },
-      { num: 7, mission: "同調・保護・育成・沈着・丁寧・平和", ego: "差別・批判・正義・強気・緊張・焦り・適当・搾取" },
-      { num: 8, mission: "哲学・追求・美学・誇り・直感・自立・行動", ego: "利己・理屈・狡猾・虚栄・誇張" },
-      { num: 9, mission: "意外・芸術・言葉・数字・気力・爆発", ego: "怠惰・批判・我慢・静止・怒り・放置・執着" }
-    ];
+    const keywordsData = {
+      1: { mission: "本質・本物・根源・懸け橋・要点・決断", ego: "迷走・保留・依頼心・複雑・諦め", desc: "あなたは物事の核心を見抜き、新しい道を切り拓くリーダーの資質を持っています。" },
+      2: { mission: "整理・要約・適格・順序・共感・親切・指導", ego: "雑・散漫・反発・慢心・優越感・逆行", desc: "周囲を調和させ、複雑な状況を整えることで、人々に安心と導きを与える存在です。" },
+      3: { mission: "具現・学習・技術・結果・客観力・地道・形", ego: "無気力・憔悴・逃避・疲労・他人軸・口先", desc: "学んだことを形にする力が強く、地道な努力を成果へと変える才能があります。" },
+      4: { mission: "語彙力・経験・体験・旅・世・自然・質問・希望", ego: "長話・孤独・停止・静観・落胆", desc: "豊かな言葉と経験を通じて、世界に希望を伝える旅人のような使命を持っています。" },
+      5: { mission: "音・文・響・芸・話・表情・情報・発信・広域", ego: "噂・悪口・疑心・秘密・否定・隠蔽", desc: "自己を表現し、情報を広く伝えることで、多くの人の心に響きをもたらします。" },
+      6: { mission: "察知・提供・準備・先見・優しさ・安心", ego: "強欲・見返り・損得・慢心・傲慢・我", desc: "一歩先を察し、献身的に準備を整えることで、周囲に癒やしと豊かさを提供します。" },
+      7: { mission: "同調・保護・育成・沈着・丁寧・平和", ego: "差別・批判・正義・強気・緊張・焦り・適当・搾取", desc: "他者に寄り添い、育むことで、平和で穏やかな環境を作り出す保護者のような存在です。" },
+      8: { mission: "哲学・追求・美学・誇り・直感・自立・行動", ego: "利己・理屈・狡猾・虚栄・誇張", desc: "自身の美学を追求し、直感に従って行動することで、孤高の道を切り拓きます。" },
+      9: { mission: "意外・芸術・言葉・数字・気力・爆発", ego: "怠惰・批判・我慢・静止・怒り・放置・執着", desc: "常識にとらわれない発想と圧倒的な気力で、新しい価値や芸術を生み出します。" }
+    };
 
     const congratsOverlay = document.getElementById('congrats-overlay');
     const mainHeader = document.getElementById('main-header');
     const nameInput = document.getElementById('name-input');
     const calcBtn = document.getElementById('calc-btn');
     const calcResult = document.getElementById('calc-result');
+    const numberTitle = document.getElementById('number-title');
+    const keywordSummary = document.getElementById('keyword-summary');
     const chatContainer = document.getElementById('chat-container');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
     const pinnedQuestion = document.getElementById('pinned-question');
     const pinnedText = document.getElementById('pinned-text');
-    const keywordsModal = document.getElementById('keywords-modal');
-    const openKeywordsBtn = document.getElementById('open-keywords-btn');
-    const closeModal = document.getElementById('close-modal');
-    const keywordsListContainer = document.getElementById('keywords-list-container');
     
     let currentNumber = null;
 
-    // キーワード生成
-    keywordsData.forEach(data => {
-      const div = document.createElement('div');
-      div.className = 'keyword-item';
-      div.innerHTML = `<h3>${data.num}の音</h3><p class="keyword-text"><span class="label-mission">【使命】</span> ${data.mission}</p><p class="keyword-text"><span class="label-ego">【エゴ】</span> ${data.ego}</p>`;
-      keywordsListContainer.appendChild(div);
-    });
-
-    openKeywordsBtn.onclick = () => keywordsModal.classList.add('visible');
-    closeModal.onclick = () => keywordsModal.classList.remove('visible');
-    window.onclick = (e) => { if(e.target == keywordsModal) keywordsModal.classList.remove('visible'); };
-
     calcBtn.addEventListener('click', () => {
       const name = nameInput.value.replace(/[^ぁ-んが-ぼぱ-ぽ]/g, '');
-      if (!name) { 
-        calcResult.innerHTML = `ひらがなでお名前を入力してください`;
-        calcResult.classList.add('visible'); 
-        return; 
-      }
+      if (!name) return;
       
       let sum = 0;
       for (let c of name) { if (charValues[c] !== undefined) sum += charValues[c]; }
@@ -259,10 +216,21 @@
       
       if (currentNumber !== total) {
         currentNumber = total;
-        calcResult.innerHTML = `あなたの音: <span class="number-highlight">${total}の音</span>`;
+        const data = keywordsData[total];
+        
+        // ヘッダー結果の更新
+        numberTitle.innerText = `${total}の音`;
+        keywordSummary.innerHTML = `
+          <div><span class="label-mission-small">【使命】</span> ${data.mission}</div>
+          <div><span class="label-ego-small">【エゴ】</span> ${data.ego}</div>
+        `;
         calcResult.classList.add('visible');
         showCongratsAnimation(); 
-        addMessage(`鑑定が完了しました。あなたの音は「${total}」です。`, 'system');
+        
+        // 修正②：鑑定後に詳しいメッセージを出す
+        setTimeout(() => {
+          addMessage(`鑑定の結果、あなたの音は「${total}」と出ました。\n\n${data.desc}\n今、あなたが抱えているお悩みに対して、この「音」がどう導いてくれるのか一緒に読み解きましょう。何か具体的に気になっていることはありますか？`, 'app');
+        }, 1600);
       }
       mainHeader.classList.add('compact');
     });
@@ -291,20 +259,20 @@
         const response = await fetch('/api/gemini', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: userText, number: currentNumber })
+          body: JSON.stringify({ message: userText, number: currentNumber, context: keywordsData[currentNumber] })
         });
         const data = await response.json();
         chatContainer.removeChild(indicator);
-        addMessage(data.reply || "鑑定の結果、導き出されたメッセージです。", 'app');
+        addMessage(data.reply, 'app');
       } catch (e) {
         if (indicator.parentNode) chatContainer.removeChild(indicator);
-        addMessage("現在は鑑定モード（デモ）です。サーバー連携後にAIとの対話が可能になります。", 'app');
+        addMessage(`あなたの「${currentNumber}の音」の視点から考えると、そのお悩みには『${keywordsData[currentNumber].mission.split('・')[0]}』の意識が鍵になるかもしれません。\n\nより深いメッセージを受け取るには、サーバー連携が必要です。`, 'app');
       }
     }
 
     sendBtn.addEventListener('click', () => {
       const text = chatInput.value.trim();
-      if (!text) return;
+      if (!text || !currentNumber) return;
       if (pinnedQuestion.style.display === 'none' || !pinnedQuestion.style.display) {
         pinnedText.innerText = text;
         pinnedQuestion.style.display = 'block';
