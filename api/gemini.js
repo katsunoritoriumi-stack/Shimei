@@ -46,7 +46,8 @@ export default async function handler(req, res) {
 
   try {
     // 5. モデル名を現行の安定版 'gemini-1.5-flash' に修正
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // 変更後
+const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
