@@ -29,7 +29,6 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; position: relative;
     }
 
-    /* ★ヘッダー全体のアニメーション設定 */
     header {
       background: var(--primary-gradient); color: #FFF; padding: 25px 20px; 
       position: relative; z-index: 10; transition: var(--transition-base);
@@ -85,12 +84,11 @@
     }
     .keyword-info.visible { display: block; animation: fadeIn 0.5s ease-out; }
 
-    /* ★分離していたバナーをヘッダー内に統合し、スッキリさせる */
     .question-banner {
       display: none; 
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px dashed rgba(212, 175, 55, 0.4); /* 背景色をなくして線を引くだけに */
+      border-top: 1px dashed rgba(212, 175, 55, 0.4); 
       text-align: left;
       transition: var(--transition-base);
     }
@@ -102,28 +100,30 @@
       font-size: 0.95rem; font-weight: bold; color: #FFF; line-height: 1.5;
     }
 
-    /* ★魔法のチャットモード：質問送信後に発動し、ヘッダーを極限まで縮める */
+    /* ★魔法のチャットモード：ロゴを残しつつ、極限までスリム化 */
     header.chat-mode {
-      padding: 15px 20px;
+      padding: 12px 15px;
     }
     header.chat-mode #header-title {
-      display: none; /* タイトルを隠してスペースを稼ぐ */
+      /* 消さずに少し小さくして表示し続ける */
+      font-size: 1.1rem; 
+      margin-bottom: 6px;
     }
     header.chat-mode .result-badge {
-      width: 65px; height: 65px; /* 数字を小さくして右上に寄せる */
-      top: 15px; right: 20px;
+      width: 60px; height: 60px; /* バッジをスリムに */
+      top: 12px; right: 15px;
       border-width: 2px;
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
     }
     header.chat-mode .result-badge .num-val {
-      font-size: 2.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      font-size: 2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     header.chat-mode .result-badge .num-label {
-      font-size: 0.55rem; margin-bottom: -2px;
+      font-size: 0.5rem; margin-bottom: -2px;
     }
     header.chat-mode .keyword-info {
-      width: calc(100% - 75px); /* 右の数字を避けて幅を広げる */
-      padding: 8px 12px;
+      width: calc(100% - 70px); 
+      padding: 6px 10px;
       font-size: 0.8rem;
       margin-top: 0;
     }
@@ -313,10 +313,10 @@
       const text = input.value.trim();
       if (!text || !currentNum) return;
       
-      // ★質問送信時、ヘッダーをスッキリ小さくする魔法のクラスを追加
+      // 送信時にヘッダーをスリム化
       mainHeader.classList.add('chat-mode');
       
-      // ★質問内容をヘッダーの最下部に表示
+      // 質問内容をバナーにセットして表示
       questionText.innerText = text;
       questionBanner.classList.add('visible');
 
