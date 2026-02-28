@@ -35,7 +35,6 @@
     
     #header-title { margin:0 0 10px 0; font-size:1.4rem; display: flex; align-items: center; gap: 8px; }
 
-    /* 数字バッジ：巨大化・中央寄り配置・青い箱に被せる */
     .result-badge {
       position: absolute; 
       top: 45px; 
@@ -52,7 +51,6 @@
     .result-badge .num-val { font-size: 4rem; font-weight: bold; font-family: 'Playfair Display', serif; line-height: 1; color: #FFF; text-shadow: 0 3px 6px rgba(0,0,0,0.3); }
     .result-badge .num-label { font-size: 0.8rem; font-weight: bold; color: #FFF; margin-bottom: -5px; letter-spacing: 0.1em;}
 
-    /* スパーク演出用 */
     .sparkle {
       position: absolute; background: #FFF; border-radius: 50%; pointer-events: none;
       box-shadow: 0 0 10px #D4AF37;
@@ -203,7 +201,6 @@
       kwEgo.innerHTML = `<span style="color:#ffca28; font-weight:bold;">【エゴ】</span> ${keywordsData[total].e}`;
       kwInfo.classList.add('visible');
 
-      // 初期鑑定メッセージ
       addMessage(`鑑定が完了しました。あなたの「音」に刻まれた数字は「${total}」です。<br>この数字が示す使命をふまえ、あなたのお悩みについて深く読み解いていきましょう。具体的に気になっていることはありますか？`, 'app');
     });
 
@@ -228,25 +225,27 @@
           })
         });
 
-        // 成功でもエラーでも、Vercelから返ってきた reply をそのまま画面に出す
         const data = await response.json();
+        
+        // 【重要】もし返答（reply）が空っぽだった場合の安全装置
+        if (!data || !data.reply) {
+          throw new Error(`サーバーからの返信が空でした。（生データ: ${JSON.stringify(data)}）`);
+        }
+
         chatContainer.removeChild(indicator);
         addMessage(data.reply, 'app');
 
       } catch (e) {
-        // JS自体のエラー（ネットワーク切断など）
         if (indicator.parentNode) chatContainer.removeChild(indicator);
-        addMessage(`通信プログラムのエラーです: ${e.message}`, 'app');
+        addMessage(`システム通信エラー: ${e.message}`, 'app');
       }
     }
 
     function addMessage(text, type) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `message ${type}-message`;
-      // 改行を正しく表示する処理
       msgDiv.innerHTML = text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
       chatContainer.appendChild(msgDiv);
-      // メッセージ追加時に必ず一番下までスクロールする
       chatContainer.scrollTop = chatContainer.scrollHeight; 
     }
 
