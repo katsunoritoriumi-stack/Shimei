@@ -28,8 +28,8 @@ export default async function handler(req, res) {
 5. 「AI」や「システム」といった言葉は一切出さないでください。`;
 
   try {
-    // ★ここが修正ポイントです（gemini-1.5-flash-latest に変更）
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
+    // ★ここを最も確実で新しいモデル「gemini-2.0-flash」に変更しました
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
