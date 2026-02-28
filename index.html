@@ -100,17 +100,15 @@
       font-size: 0.95rem; font-weight: bold; color: #FFF; line-height: 1.5;
     }
 
-    /* ★魔法のチャットモード：ロゴを残しつつ、極限までスリム化 */
     header.chat-mode {
       padding: 12px 15px;
     }
     header.chat-mode #header-title {
-      /* 消さずに少し小さくして表示し続ける */
       font-size: 1.1rem; 
       margin-bottom: 6px;
     }
     header.chat-mode .result-badge {
-      width: 60px; height: 60px; /* バッジをスリムに */
+      width: 60px; height: 60px; 
       top: 12px; right: 15px;
       border-width: 2px;
       box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
@@ -219,6 +217,13 @@
 
     let currentNum = null;
 
+    // タブを切り替えて戻ってきた際にスクロールバーを一番下にする処理
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    });
+
     function createSparkles() {
       sparkleContainer.innerHTML = '';
       for (let i = 0; i < 40; i++) {
@@ -305,7 +310,17 @@
       msgDiv.className = `message ${type}-message`;
       msgDiv.innerHTML = text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
       chatContainer.appendChild(msgDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight; 
+      
+      // ★追加：送信者がAIの場合はメッセージの先頭にスクロール、ユーザーの場合は一番下にスクロール
+      if (type === 'app') {
+        setTimeout(() => { 
+          msgDiv.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+        }, 50);
+      } else {
+        setTimeout(() => { 
+          chatContainer.scrollTop = chatContainer.scrollHeight; 
+        }, 50);
+      }
     }
 
     document.getElementById('send-btn').onclick = () => {
@@ -313,10 +328,8 @@
       const text = input.value.trim();
       if (!text || !currentNum) return;
       
-      // 送信時にヘッダーをスリム化
       mainHeader.classList.add('chat-mode');
       
-      // 質問内容をバナーにセットして表示
       questionText.innerText = text;
       questionBanner.classList.add('visible');
 
