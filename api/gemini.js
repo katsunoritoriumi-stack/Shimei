@@ -28,8 +28,9 @@ export default async function handler(req, res) {
 5. 「AI」や「システム」といった言葉は一切出さないでください。`;
 
   try {
-    // ★ここを、2026年現在最新かつ確実に無料で使える「gemini-3.0-flash」に変更しました
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.0-flash:generateContent?key=${API_KEY}`, {
+    // 【最終修正】テスト用のv1betaではなく、本番用の「v1」エンドポイントを使用し、
+    // 最も安定している「gemini-1.5-flash」を指定しています。
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
