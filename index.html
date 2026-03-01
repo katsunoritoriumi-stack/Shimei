@@ -1,909 +1,507 @@
-<!DOCTYPE html>
-<html lang="ja">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>使命鑑定ナビ</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Klee+One&family=Playfair+Display:wght@700&display=swap"
-    rel="stylesheet">
-  <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #1A253A 0%, #3C5A99 100%);
-      --accent-gradient: linear-gradient(135deg, #D4AF37 0%, #b58900 100%);
-      --gold-accent: #D4AF37;
-      --app-bg: #FFFFFF;
-      --transition-base: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: '游明朝', 'YuMincho', serif;
-      background: #F5F1E9;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-    }
-
-    .app-container {
-      width: 100%;
-      max-width: 500px;
-      height: 98vh;
-      background: var(--app-bg);
-      display: flex;
-      flex-direction: column;
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-      overflow: hidden;
-      position: relative;
-    }
-
-    header {
-      background: var(--primary-gradient);
-      color: #FFF;
-      padding: 25px 20px;
-      position: relative;
-      z-index: 10;
-      transition: var(--transition-base);
-    }
-
-    .history-btn {
-      position: absolute;
-      top: 18px;
-      right: 15px;
-      background: rgba(255, 255, 255, 0.15);
-      color: #FFF;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: var(--transition-base);
-      font-family: '游明朝', 'YuMincho', serif;
-    }
-
-    .history-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    header.chat-mode .history-btn {
-      top: 10px;
-      padding: 4px 10px;
-      font-size: 0.72rem;
-    }
-
-    /* ---- 履歴パネル ---- */
-    #history-panel {
-      position: absolute;
-      inset: 0;
-      z-index: 100;
-      background: #F5F1E9;
-      display: none;
-      flex-direction: column;
-      border-radius: 24px;
-      overflow: hidden;
-    }
-
-    #history-panel.open {
-      display: flex;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .history-header {
-      background: var(--primary-gradient);
-      color: #FFF;
-      padding: 20px 20px 15px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .history-back-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: #FFF;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    .history-header h2 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: normal;
-    }
-
-    #history-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .history-empty {
-      text-align: center;
-      color: #999;
-      margin-top: 60px;
-      font-size: 0.9rem;
-      line-height: 1.8;
-    }
-
-    .history-card {
-      background: #FFF;
-      border-radius: 16px;
-      padding: 16px 18px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-      cursor: pointer;
-      border-left: 4px solid var(--gold-accent);
-      transition: var(--transition-base);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .history-card:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .history-card-info {
-      flex: 1;
-    }
-
-    .history-card-name {
-      font-size: 1.05rem;
-      font-weight: bold;
-      color: #1A253A;
-      margin-bottom: 4px;
-    }
-
-    .history-card-sub {
-      font-size: 0.8rem;
-      color: #888;
-    }
-
-    .history-card-badge {
-      background: var(--accent-gradient);
-      color: #FFF;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      font-weight: bold;
-      font-family: 'Playfair Display', serif;
-      flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
-    }
-
-    .history-card-del {
-      background: none;
-      border: none;
-      color: #ccc;
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      margin-left: 8px;
-      transition: color 0.2s;
-    }
-
-    .history-card-del:hover {
-      color: #e74c3c;
-    }
-
-    /* ---- 履歴詳細パネル ---- */
-    #history-detail-panel {
-      position: absolute;
-      inset: 0;
-      z-index: 110;
-      background: #FAFCFD;
-      display: none;
-      flex-direction: column;
-      border-radius: 24px;
-      overflow: hidden;
-    }
-
-    #history-detail-panel.open {
-      display: flex;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .history-detail-header {
-      background: var(--primary-gradient);
-      color: #FFF;
-      padding: 16px 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .history-detail-header h2 {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: normal;
-      flex: 1;
-    }
-
-    .history-detail-badge {
-      background: var(--accent-gradient);
-      color: #FFF;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      font-weight: bold;
-      font-family: 'Playfair Display', serif;
-      flex-shrink: 0;
-    }
-
-    #history-detail-chat {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .history-detail-keywords {
-      background: var(--primary-gradient);
-      color: #FFF;
-      padding: 10px 15px;
-      font-size: 0.82rem;
-      flex-shrink: 0;
-    }
-
-    #header-title {
-      margin: 0 0 10px 0;
-      font-size: 1.4rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: var(--transition-base);
-    }
-
-    .result-badge {
-      position: absolute;
-      top: 45px;
-      right: 40px;
-      background: var(--accent-gradient);
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 30px rgba(212, 175, 55, 0.9), inset 0 0 15px rgba(255, 255, 255, 0.5);
-      border: 4px solid #FFF;
-      z-index: 30;
-      opacity: 0;
-      transition: var(--transition-base);
-    }
-
-    .result-badge.visible {
-      display: flex;
-    }
-
-    .result-badge .num-val {
-      font-size: 4rem;
-      font-weight: bold;
-      font-family: 'Playfair Display', serif;
-      line-height: 1;
-      color: #FFF;
-      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
-      transition: var(--transition-base);
-    }
-
-    .result-badge .num-label {
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: #FFF;
-      margin-bottom: -5px;
-      letter-spacing: 0.1em;
-      transition: var(--transition-base);
-    }
-
-    .sparkle {
-      position: absolute;
-      background: #FFF;
-      border-radius: 50%;
-      pointer-events: none;
-      box-shadow: 0 0 10px #D4AF37;
-    }
-
-    @keyframes particleFade {
-      0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-      }
-
-      100% {
-        transform: translate(var(--dx), var(--dy)) scale(0);
-        opacity: 0;
-      }
-    }
-
-    .calculator-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      margin-top: 10px;
-    }
-
-    .name-input {
-      width: 90%;
-      padding: 12px 20px;
-      border: 2px solid #DDE2E5;
-      border-radius: 30px;
-      text-align: center;
-      font-size: 1.1rem;
-      font-family: 'Klee One', cursive;
-      outline: none;
-    }
-
-    .calc-btn {
-      background: var(--gold-accent);
-      color: #0D1B2A;
-      border: none;
-      padding: 12px 35px;
-      border-radius: 25px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    .keyword-info {
-      margin-top: 5px;
-      font-size: 0.9rem;
-      text-align: left;
-      width: 75%;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 15px;
-      border-radius: 12px;
-      display: none;
-      position: relative;
-      z-index: 10;
-      transition: var(--transition-base);
-    }
-
-    .keyword-info.visible {
-      display: block;
-      animation: fadeIn 0.5s ease-out;
-    }
-
-    .question-banner {
-      display: none;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed rgba(212, 175, 55, 0.4);
-      text-align: left;
-      transition: var(--transition-base);
-    }
-
-    .question-banner.visible {
-      display: block;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    .question-banner .banner-label {
-      font-size: 0.75rem;
-      color: var(--gold-accent);
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    #question-text {
-      font-size: 0.95rem;
-      font-weight: bold;
-      color: #FFF;
-      line-height: 1.5;
-    }
-
-    header.chat-mode {
-      padding: 12px 15px;
-    }
-
-    header.chat-mode #header-title {
-      font-size: 1.1rem;
-      margin-bottom: 6px;
-    }
-
-    header.chat-mode .result-badge {
-      width: 60px;
-      height: 60px;
-      top: 12px;
-      right: 15px;
-      border-width: 2px;
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
-    }
-
-    header.chat-mode .result-badge .num-val {
-      font-size: 2rem;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    header.chat-mode .result-badge .num-label {
-      font-size: 0.5rem;
-      margin-bottom: -2px;
-    }
-
-    header.chat-mode .keyword-info {
-      width: calc(100% - 70px);
-      padding: 6px 10px;
-      font-size: 0.8rem;
-      margin-top: 0;
-    }
-
-    header.chat-mode .question-banner {
-      margin-top: 8px;
-      padding-top: 8px;
-    }
-
-    #chat-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      background: #FAFCFD;
-    }
-
-    .message {
-      max-width: 90%;
-      padding: 15px 20px;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      animation: fadeIn 0.4s ease-out;
-    }
-
-    .app-message {
-      align-self: flex-start;
-      background: #FFF;
-      border: 1px solid #EEF2F5;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    }
-
-    .user-message {
-      align-self: flex-end;
-      background: var(--primary-gradient);
-      color: #FFF;
-      border-bottom-right-radius: 4px;
-    }
-
-    .typing-indicator {
-      align-self: flex-start;
-      display: flex;
-      gap: 5px;
-      padding: 12px 18px;
-      background: #FFF;
-      border: 1px solid #EEF2F5;
-      border-radius: 20px;
-      border-bottom-left-radius: 4px;
-    }
-
-    .typing-indicator span {
-      width: 6px;
-      height: 6px;
-      background: #BDC3C7;
-      border-radius: 50%;
-      animation: bounce 1.4s infinite;
-    }
-
-    @keyframes bounce {
-
-      0%,
-      80%,
-      100% {
-        transform: scale(0);
-      }
-
-      40% {
-        transform: scale(1);
-      }
-    }
-
-    .input-area {
-      display: flex;
-      padding: 15px;
-      border-top: 1px solid #EEF2F5;
-      gap: 10px;
-      background: #FFF;
-    }
-
-    #chat-input {
-      flex: 1;
-      padding: 12px 20px;
-      border-radius: 25px;
-      border: 1px solid #E5E8E8;
-      outline: none;
-    }
-
-    #send-btn {
-      background: var(--accent-gradient);
-      color: #FFF;
-      border: none;
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="app-container">
-    <!-- 履歴一覧パネル -->
-    <div id="history-panel">
-      <div class="history-header">
-        <button class="history-back-btn" id="history-back-btn"><i class="fas fa-arrow-left"></i></button>
-        <h2><i class="fas fa-scroll" style="color:var(--gold-accent);margin-right:6px;"></i>鑑定履歴</h2>
-      </div>
-      <div id="history-list"></div>
-    </div>
-
-    <!-- 履歴詳細パネル -->
-    <div id="history-detail-panel">
-      <div class="history-detail-header">
-        <button class="history-back-btn" id="detail-back-btn"><i class="fas fa-arrow-left"></i></button>
-        <h2 id="detail-title"></h2>
-        <div class="history-detail-badge" id="detail-badge"></div>
-      </div>
-      <div class="history-detail-keywords" id="detail-keywords"></div>
-      <div id="history-detail-chat"></div>
-    </div>
-
-    <header id="main-header">
-      <h1 id="header-title"><i class="fas fa-gem" style="color:var(--gold-accent);"></i> 使命鑑定ナビ</h1>
-      <button class="history-btn" id="history-open-btn"><i class="fas fa-clock-rotate-left"></i> 履歴</button>
-
-      <div id="result-badge" class="result-badge">
-        <span class="num-label">あなたの音</span>
-        <span id="num-val" class="num-val"></span>
-        <div id="sparkle-container" style="position:absolute; width:100%; height:100%;"></div>
-      </div>
-
-      <div class="calculator-container" id="calc-area">
-        <input type="text" id="name-input" class="name-input" placeholder="お名前をひらがなで入力">
-        <button id="calc-btn" class="calc-btn"><i class="fas fa-sparkles"></i> 音を導き出す</button>
-      </div>
-
-      <div id="keyword-info" class="keyword-info">
-        <div id="kw-mission" style="margin-bottom:8px;"></div>
-        <div id="kw-ego"></div>
-      </div>
-
-      <div id="question-banner" class="question-banner">
-        <div class="banner-label"><i class="fas fa-pen-nib"></i> あなたの相談内容</div>
-        <div id="question-text"></div>
-      </div>
-    </header>
-
-    <div id="chat-container">
-      <div id="welcome-msg" class="message app-message">
-        こんにちは。<br>あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br>まずはお名前をひらがなで入力し、「音を導き出す」ボタンを押してください。
-      </div>
-    </div>
-
-    <div class="input-area">
-      <input type="text" id="chat-input" placeholder="お悩みをご相談ください...">
-      <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
-    </div>
-  </div>
-
-  <script>
-    const charValues = { 'あ': 18, 'い': 5, 'う': 19, 'え': 43, 'お': 40, 'か': 25, 'き': 29, 'く': 11, 'け': 35, 'こ': 16, 'さ': 28, 'し': 23, 'す': 21, 'せ': 36, 'そ': 30, 'た': 26, 'ち': 27, 'つ': 44, 'て': 9, 'と': 17, 'な': 14, 'に': 32, 'ぬ': 39, 'ね': 46, 'の': 20, 'は': 42, 'ひ': 1, 'ふ': 2, 'へ': 22, 'ほ': 47, 'ま': 6, 'み': 3, 'む': 13, 'め': 10, 'も': 33, 'や': 15, 'ゆ': 37, 'よ': 4, 'ら': 31, 'り': 8, 'る': 12, 'れ': 24, 'ろ': 34, 'わ': 7, 'ん': 48, 'が': 25, 'ぎ': 29, 'ぐ': 11, 'げ': 35, 'ご': 16, 'ざ': 28, 'じ': 23, 'ず': 21, 'ぜ': 36, 'ぞ': 30, 'だ': 26, 'ぢ': 27, 'づ': 44, 'で': 9, 'ど': 17, 'ば': 42, 'び': 1, 'ぶ': 2, 'べ': 22, 'ぼ': 47, 'ぱ': 42, 'ぴ': 1, 'ぷ': 2, 'ぺ': 22, 'ぽ': 47 };
-    const keywordsData = {
-      1: { m: "本質・本物・根源", e: "迷走・保留・依頼心" },
-      2: { m: "整理・要約・適格", e: "雑・散漫・慢心" },
-      3: { m: "具現・学習・技術", e: "無気力・憔悴・逃避" },
-      4: { m: "語彙力・経験・体験", e: "長話・孤独・停止" },
-      5: { m: "音・文・響・芸", e: "噂・悪口・疑心" },
-      6: { m: "察知・提供・準備", e: "強欲・見返り・損得" },
-      7: { m: "同調・保護・育成", e: "差別・批判・強気" },
-      8: { m: "哲学・追求・美学", e: "利己・理屈・虚栄" },
-      9: { m: "意外・芸術・言葉", e: "怠惰・批判・執着" }
-    };
-
-    const mainHeader = document.getElementById('main-header');
-    const nameInput = document.getElementById('name-input');
-    const calcBtn = document.getElementById('calc-btn');
-    const chatContainer = document.getElementById('chat-container');
-    const welcomeMsg = document.getElementById('welcome-msg');
-    const resultBadge = document.getElementById('result-badge');
-    const numVal = document.getElementById('num-val');
-    const sparkleContainer = document.getElementById('sparkle-container');
-    const kwInfo = document.getElementById('keyword-info');
-    const kwMission = document.getElementById('kw-mission');
-    const kwEgo = document.getElementById('kw-ego');
-    const calcArea = document.getElementById('calc-area');
-
-    const questionBanner = document.getElementById('question-banner');
-    const questionText = document.getElementById('question-text');
-
-    let currentNum = null;
-    let currentSessionId = null;
-    let currentMessages = []; // {role:'app'|'user', text:string}
-    let currentName = '';
-
-    // ---- 履歴 localStorage ヘルパー ----
-    const STORAGE_KEY = 'shimei_history';
-    function loadHistory() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { return []; }
-    }
-    function saveHistory(list) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    }
-    function saveCurrentSession() {
-      if (!currentSessionId) return;
-      const list = loadHistory();
-      const idx = list.findIndex(s => s.id === currentSessionId);
-      const session = {
-        id: currentSessionId,
-        name: currentName,
-        num: currentNum,
-        keywords: { m: keywordsData[currentNum]?.m, e: keywordsData[currentNum]?.e },
-        messages: currentMessages,
-        date: new Date().toISOString()
-      };
-      if (idx >= 0) list[idx] = session; else list.unshift(session);
-      saveHistory(list);
-    }
-
-    // タブを切り替えて戻ってきた際にスクロールバーを一番下にする処理
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      }
-    });
-
-    function createSparkles() {
-      sparkleContainer.innerHTML = '';
-      for (let i = 0; i < 40; i++) {
-        const s = document.createElement('div');
-        s.className = 'sparkle';
-        const size = Math.random() * 10 + 5;
-        s.style.width = `${size}px`; s.style.height = `${size}px`;
-        const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 120 + 60;
-        s.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
-        s.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
-        s.style.animation = `particleFade 1s ease-out forwards`;
-        s.style.left = '50%'; s.style.top = '50%';
-        sparkleContainer.appendChild(s);
-      }
-    }
-
-    calcBtn.addEventListener('click', () => {
-      const name = nameInput.value.replace(/[^ぁ-んが-ぼぱ-ぽ]/g, '');
-      if (!name) return;
-
-      let total = 0;
-      for (let c of name) { total += charValues[c] || 0; }
-      total = Math.abs(total);
-      while (total >= 10) { total = total.toString().split('').map(Number).reduce((a, b) => a + b, 0); }
-
-      currentNum = total;
-      currentName = nameInput.value.trim();
-      currentMessages = [];
-      currentSessionId = Date.now().toString();
-
-      if (welcomeMsg) welcomeMsg.remove();
-      numVal.innerText = total;
-      resultBadge.classList.add('visible');
-
-      resultBadge.animate([
-        { transform: 'translate(50px, -50px) scale(0)', opacity: 0 },
-        { transform: 'translate(0, 0) scale(1.2)', opacity: 1, offset: 0.8 },
-        { transform: 'translate(0, 0) scale(1)', opacity: 1 }
-      ], { duration: 700, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)', fill: 'forwards' });
-
-      setTimeout(createSparkles, 200);
-
-      calcArea.style.display = 'none';
-      kwMission.innerHTML = `<span style="color:#8eb1ff; font-weight:bold;">【使命】</span> ${keywordsData[total].m}`;
-      kwEgo.innerHTML = `<span style="color:#ffca28; font-weight:bold;">【エゴ】</span> ${keywordsData[total].e}`;
-      kwInfo.classList.add('visible');
-
-      const firstMsg = `鑑定が完了しました。あなたの「音」に刻まれた数字は「${total}」です。<br>この数字が示す使命をふまえ、あなたのお悩みについて深く読み解いていきましょう。具体的に気になっていることはありますか？`;
-      addMessage(firstMsg, 'app');
-      saveCurrentSession();
-    });
-
-    async function generateAIResponse(userText) {
-      const indicator = document.createElement('div');
-      indicator.className = 'typing-indicator';
-      indicator.innerHTML = '<span></span><span></span><span></span>';
-      chatContainer.appendChild(indicator);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Gem, 
+  History, 
+  ArrowLeft, 
+  Send, 
+  Trash2, 
+  Clock, 
+  Sparkles, 
+  Pen,
+  Moon
+} from 'lucide-react';
+
+// --- Constants & Data ---
+const charValues: Record<string, number> = { 
+  'あ': 18, 'い': 5, 'う': 19, 'え': 43, 'お': 40, 
+  'か': 25, 'き': 29, 'く': 11, 'け': 35, 'こ': 16, 
+  'さ': 28, 'し': 23, 'す': 21, 'せ': 36, 'そ': 30, 
+  'た': 26, 'ち': 27, 'つ': 44, 'て': 9, 'と': 17, 
+  'な': 14, 'に': 32, 'ぬ': 39, 'ね': 46, 'の': 20, 
+  'は': 42, 'ひ': 1, 'ふ': 2, 'へ': 22, 'ほ': 47, 
+  'ま': 6, 'み': 3, 'む': 13, 'め': 10, 'も': 33, 
+  'や': 15, 'ゆ': 37, 'よ': 4, 'ら': 31, 'り': 8, 
+  'る': 12, 'れ': 24, 'ろ': 34, 'わ': 7, 'ん': 48, 
+  'が': 25, 'ぎ': 29, 'ぐ': 11, 'げ': 35, 'ご': 16, 
+  'ざ': 28, 'じ': 23, 'ず': 21, 'ぜ': 36, 'ぞ': 30, 
+  'だ': 26, 'ぢ': 27, 'づ': 44, 'で': 9, 'ど': 17, 
+  'ば': 42, 'び': 1, 'ぶ': 2, 'べ': 22, 'ぼ': 47, 
+  'ぱ': 42, 'ぴ': 1, 'ぷ': 2, 'ぺ': 22, 'ぽ': 47 
+};
+
+const keywordsData: Record<number, { m: string; e: string }> = {
+  1: { m: "本質・本物・根源", e: "迷走・保留・依頼心" },
+  2: { m: "整理・要約・適格", e: "雑・散漫・慢心" },
+  3: { m: "具現・学習・技術", e: "無気力・憔悴・逃避" },
+  4: { m: "語彙力・経験・体験", e: "長話・孤独・停止" },
+  5: { m: "音・文・響・芸", e: "噂・悪口・疑心" },
+  6: { m: "察知・提供・準備", e: "強欲・見返り・損得" },
+  7: { m: "同調・保護・育成", e: "差別・批判・強気" },
+  8: { m: "哲学・追求・美学", e: "利己・理屈・虚栄" },
+  9: { m: "意外・芸術・言葉", e: "怠惰・批判・執着" }
+};
+
+interface Message {
+  role: 'app' | 'user';
+  text: string;
+}
+
+interface Session {
+  id: string;
+  name: string;
+  num: number;
+  keywords: { m: string; e: string };
+  messages: Message[];
+  date: string;
+}
+
+const STORAGE_KEY = 'shimei_history';
+
+export default function App() {
+  const [name, setName] = useState('');
+  const [currentNum, setCurrentNum] = useState<number | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isChatMode, setIsChatMode] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [history, setHistory] = useState<Session[]>([]);
+  const [view, setView] = useState<'main' | 'history' | 'detail'>('main');
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [lastQuestion, setLastQuestion] = useState('');
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // --- Effects ---
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
       try {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userText: userText,
-            currentNumber: currentNum
-          })
-        });
-
-        const data = await response.json();
-        chatContainer.removeChild(indicator);
-
-        if (data.error) {
-          addMessage(`システム通信エラー: ${data.error}`, 'app');
-        } else if (data.text) {
-          addMessage(data.text, 'app');
-        } else {
-          addMessage(`予期せぬエラーが発生しました。`, 'app');
-        }
-
+        setHistory(JSON.parse(saved));
       } catch (e) {
-        if (indicator.parentNode) chatContainer.removeChild(indicator);
-        addMessage(`通信プログラムのエラーです: ${e.message}`, 'app');
+        console.error("Failed to parse history", e);
       }
     }
+  }, []);
 
-    function addMessage(text, type, saveToHistory = true) {
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `message ${type}-message`;
-      msgDiv.innerHTML = text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-      chatContainer.appendChild(msgDiv);
-
-      if (saveToHistory && currentSessionId) {
-        currentMessages.push({ role: type, text: text });
-        saveCurrentSession();
-      }
-
-      // 送信者がAIの場合はメッセージの先頭にスクロール、ユーザーの場合は一番下にスクロール
-      if (type === 'app') {
-        setTimeout(() => {
-          msgDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 50);
-      } else {
-        setTimeout(() => {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 50);
-      }
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  }, [messages, isTyping]);
 
-    document.getElementById('send-btn').onclick = () => {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (!text || !currentNum) return;
-
-      mainHeader.classList.add('chat-mode');
-
-      questionText.innerText = text;
-      questionBanner.classList.add('visible');
-
-      addMessage(text, 'user');
-      input.value = '';
-      generateAIResponse(text);
+  // --- Logic ---
+  const saveSession = (updatedMessages: Message[], num: number, sessionName: string, sessionId: string) => {
+    const session: Session = {
+      id: sessionId,
+      name: sessionName,
+      num: num,
+      keywords: keywordsData[num],
+      messages: updatedMessages,
+      date: new Date().toISOString()
     };
 
-    document.getElementById('chat-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('send-btn').click(); });
-
-    // ---- 履歴パネル 開閉 ----
-    const historyPanel = document.getElementById('history-panel');
-    const historyDetailPanel = document.getElementById('history-detail-panel');
-
-    document.getElementById('history-open-btn').addEventListener('click', () => {
-      renderHistoryList();
-      historyPanel.classList.add('open');
-    });
-    document.getElementById('history-back-btn').addEventListener('click', () => {
-      historyPanel.classList.remove('open');
-    });
-    document.getElementById('detail-back-btn').addEventListener('click', () => {
-      historyDetailPanel.classList.remove('open');
-    });
-
-    function formatDate(iso) {
-      const d = new Date(iso);
-      return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    }
-
-    function renderHistoryList() {
-      const list = loadHistory();
-      const container = document.getElementById('history-list');
-      container.innerHTML = '';
-      if (list.length === 0) {
-        container.innerHTML = '<div class="history-empty"><i class="fas fa-moon" style="font-size:2rem;color:#ccc;display:block;margin-bottom:12px;"></i>まだ鑑定履歴がありません。<br>名前を入力して最初の鑑定を始めましょう。</div>';
-        return;
+    setHistory(prev => {
+      const idx = prev.findIndex(s => s.id === sessionId);
+      let newList;
+      if (idx >= 0) {
+        newList = [...prev];
+        newList[idx] = session;
+      } else {
+        newList = [session, ...prev];
       }
-      list.forEach(session => {
-        const card = document.createElement('div');
-        card.className = 'history-card';
-        const msgCount = session.messages ? session.messages.length : 0;
-        card.innerHTML = `
-          <div class="history-card-info">
-            <div class="history-card-name">${session.name || '（名前なし）'}</div>
-            <div class="history-card-sub">${formatDate(session.date)} ・ ${msgCount}件のメッセージ</div>
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+      return newList;
+    });
+  };
+
+  const calculateNumber = (inputName: string) => {
+    const cleanName = inputName.replace(/[^ぁ-んが-ぼぱ-ぽ]/g, '');
+    if (!cleanName) return null;
+
+    let total = 0;
+    for (const char of cleanName) {
+      total += charValues[char] || 0;
+    }
+    total = Math.abs(total);
+    while (total >= 10) {
+      total = total.toString().split('').map(Number).reduce((a, b) => a + b, 0);
+    }
+    return total;
+  };
+
+  const handleStartAppraisal = (targetNum?: number) => {
+    let num = targetNum;
+    let displayName = name;
+
+    if (num === undefined) {
+      num = calculateNumber(name) || undefined;
+      if (num === undefined) return;
+    } else {
+      displayName = `数秘 ${num} の方`;
+    }
+
+    const sessionId = Date.now().toString();
+    const firstMsg: Message = {
+      role: 'app',
+      text: `鑑定が完了しました。あなたの「音」に刻まれた数字は「${num}」です。\nこの数字が示す使命をふまえ、あなたのお悩みについて深く読み解いていきましょう。具体的に気になっていることはありますか？`
+    };
+
+    setCurrentNum(num);
+    setCurrentSessionId(sessionId);
+    setName(displayName);
+    setMessages([firstMsg]);
+    setIsChatMode(false); // Start with appraisal result view
+    saveSession([firstMsg], num, displayName, sessionId);
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || currentNum === null || !currentSessionId) return;
+
+    const userText = chatInput.trim();
+    const newUserMsg: Message = { role: 'user', text: userText };
+    const updatedMessages = [...messages, newUserMsg];
+    
+    setMessages(updatedMessages);
+    setChatInput('');
+    setIsChatMode(true);
+    setLastQuestion(userText);
+    saveSession(updatedMessages, currentNum, name, currentSessionId);
+
+    setIsTyping(true);
+
+    try {
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userText,
+          currentNumber: currentNum,
+          history: messages.slice(-5) // Send last few messages for context
+        })
+      });
+
+      const data = await response.json();
+      setIsTyping(false);
+
+      if (data.text) {
+        const appMsg: Message = { role: 'app', text: data.text };
+        const finalMessages = [...updatedMessages, appMsg];
+        setMessages(finalMessages);
+        saveSession(finalMessages, currentNum, name, currentSessionId);
+      } else {
+        addErrorMessage("申し訳ありません。鑑定中にエラーが発生しました。");
+      }
+    } catch (e) {
+      setIsTyping(false);
+      addErrorMessage("通信エラーが発生しました。");
+    }
+  };
+
+  const addErrorMessage = (text: string) => {
+    const errorMsg: Message = { role: 'app', text };
+    setMessages(prev => [...prev, errorMsg]);
+  };
+
+  const deleteSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newList = history.filter(s => s.id !== id);
+    setHistory(newList);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newList));
+  };
+
+  const openDetail = (session: Session) => {
+    setSelectedSession(session);
+    setView('detail');
+  };
+
+  const resetApp = () => {
+    setName('');
+    setCurrentNum(null);
+    setMessages([]);
+    setIsChatMode(false);
+    setCurrentSessionId(null);
+    setView('main');
+  };
+
+  // --- Render Helpers ---
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="flex justify-center items-center h-screen w-screen bg-paper overflow-hidden font-sans">
+      <div className="w-full max-w-[500px] h-[98vh] bg-white flex flex-col rounded-3xl shadow-2xl overflow-hidden relative border border-black/5">
+        
+        {/* --- History List Panel --- */}
+        <AnimatePresence>
+          {view === 'history' && (
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute inset-0 z-50 bg-paper flex flex-col"
+            >
+              <div className="bg-gradient-to-br from-navy to-navy-light text-white p-5 flex items-center gap-3">
+                <button onClick={() => setView('main')} className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors">
+                  <ArrowLeft size={18} />
+                </button>
+                <h2 className="text-lg flex items-center gap-2"><Clock size={18} className="text-gold" /> 鑑定履歴</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {history.length === 0 ? (
+                  <div className="text-center text-gray-400 mt-16 space-y-3">
+                    <Moon size={48} className="mx-auto opacity-20" />
+                    <p className="text-sm leading-relaxed">まだ鑑定履歴がありません。<br />名前を入力して最初の鑑定を始めましょう。</p>
+                  </div>
+                ) : (
+                  history.map(session => (
+                    <div 
+                      key={session.id} 
+                      onClick={() => openDetail(session)}
+                      className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gold flex justify-between items-center cursor-pointer hover:translate-x-1 transition-transform group"
+                    >
+                      <div className="flex-1">
+                        <div className="font-bold text-navy">{session.name}</div>
+                        <div className="text-xs text-gray-400 mt-1">{formatDate(session.date)} ・ {session.messages.length}件</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gold to-gold-dark text-white flex items-center justify-center font-display text-xl font-bold shadow-md">
+                          {session.num}
+                        </div>
+                        <button 
+                          onClick={(e) => deleteSession(session.id, e)}
+                          className="text-gray-300 hover:text-red-500 p-2 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* --- History Detail Panel --- */}
+        <AnimatePresence>
+          {view === 'detail' && selectedSession && (
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="absolute inset-0 z-[60] bg-white flex flex-col"
+            >
+              <div className="bg-gradient-to-br from-navy to-navy-light text-white p-4 flex items-center gap-3">
+                <button onClick={() => setView('history')} className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors">
+                  <ArrowLeft size={18} />
+                </button>
+                <h2 className="flex-1 text-base truncate">{selectedSession.name}</h2>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-dark text-white flex items-center justify-center font-display text-lg font-bold">
+                  {selectedSession.num}
+                </div>
+              </div>
+              <div className="bg-navy text-white/80 px-4 py-2 text-xs flex gap-4">
+                <span><span className="text-blue-300 font-bold">【使命】</span> {selectedSession.keywords.m}</span>
+                <span><span className="text-yellow-400 font-bold">【エゴ】</span> {selectedSession.keywords.e}</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-paper/30">
+                {selectedSession.messages.map((msg, i) => (
+                  <div key={i} className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user' 
+                      ? 'ml-auto bg-gradient-to-br from-navy to-navy-light text-white rounded-br-none' 
+                      : 'bg-white border border-gray-100 shadow-sm rounded-bl-none'
+                  }`}>
+                    {msg.text.split('\n').map((line, j) => <p key={j}>{line}</p>)}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* --- Main Header --- */}
+        <header className={`bg-gradient-to-br from-navy to-navy-light text-white transition-all duration-500 relative z-10 ${
+          isChatMode ? 'p-3' : 'p-6 pb-8'
+        }`}>
+          <div className="flex justify-between items-center mb-4">
+            <h1 
+              onClick={resetApp}
+              className={`flex items-center gap-2 cursor-pointer transition-all ${isChatMode ? 'text-lg' : 'text-2xl'}`}
+            >
+              <Gem className="text-gold" size={isChatMode ? 20 : 28} /> 使命鑑定ナビ
+            </h1>
+            <button 
+              onClick={() => setView('history')}
+              className="bg-white/10 border border-white/20 px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 hover:bg-white/20 transition-colors"
+            >
+              <History size={14} /> 履歴
+            </button>
           </div>
-          <div class="history-card-badge">${session.num}</div>
-          <button class="history-card-del" data-id="${session.id}" title="削除"><i class="fas fa-trash"></i></button>
-        `;
-        card.addEventListener('click', (e) => {
-          if (e.target.closest('.history-card-del')) return;
-          openHistoryDetail(session);
-        });
-        card.querySelector('.history-card-del').addEventListener('click', (e) => {
-          e.stopPropagation();
-          deleteSession(session.id);
-          renderHistoryList();
-        });
-        container.appendChild(card);
-      });
-    }
 
-    function deleteSession(id) {
-      const list = loadHistory().filter(s => s.id !== id);
-      saveHistory(list);
-    }
+          {/* Appraisal Result Badge */}
+          <AnimatePresence>
+            {currentNum !== null && (
+              <motion.div 
+                initial={{ scale: 0, opacity: 0, x: 50, y: -50 }}
+                animate={{ 
+                  scale: isChatMode ? 0.6 : 1, 
+                  opacity: 1, 
+                  x: 0, 
+                  y: 0,
+                  top: isChatMode ? 12 : 45,
+                  right: isChatMode ? 15 : 40
+                }}
+                className="absolute bg-gradient-to-br from-gold to-gold-dark rounded-full flex flex-col items-center justify-center border-4 border-white shadow-[0_0_30px_rgba(212,175,55,0.6)] z-30"
+                style={{ 
+                  width: isChatMode ? 80 : 120, 
+                  height: isChatMode ? 80 : 120,
+                  position: 'absolute'
+                }}
+              >
+                <span className={`font-bold text-white/90 tracking-widest ${isChatMode ? 'text-[8px]' : 'text-[10px]'}`}>あなたの音</span>
+                <span className={`font-display font-bold text-white leading-none drop-shadow-md ${isChatMode ? 'text-4xl' : 'text-6xl'}`}>
+                  {currentNum}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-    function openHistoryDetail(session) {
-      document.getElementById('detail-title').textContent = session.name || '（名前なし）';
-      document.getElementById('detail-badge').textContent = session.num;
-      const kw = session.keywords || {};
-      document.getElementById('detail-keywords').innerHTML =
-        `<span style="color:#8eb1ff;font-weight:bold;">【使命】</span> ${kw.m || '―'} &emsp; <span style="color:#ffca28;font-weight:bold;">【エゴ】</span> ${kw.e || '―'}`;
-      const chatArea = document.getElementById('history-detail-chat');
-      chatArea.innerHTML = '';
-      (session.messages || []).forEach(msg => {
-        const div = document.createElement('div');
-        div.className = `message ${msg.role}-message`;
-        div.innerHTML = msg.text.replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-        chatArea.appendChild(div);
-      });
-      historyDetailPanel.classList.add('open');
-      setTimeout(() => { chatArea.scrollTop = 0; }, 100);
-    }
-  </script>
-</body>
+          {/* Input Area (Initial) */}
+          {!currentNum && (
+            <div className="mt-6 space-y-6">
+              <div className="flex flex-col items-center gap-4">
+                <input 
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="お名前（例:やまだはなこ）"
+                  className="w-[90%] px-5 py-3 rounded-full border-2 border-white/20 bg-white/10 text-white placeholder:text-white/40 text-center text-lg font-klee outline-none focus:border-gold transition-colors"
+                />
+                <button 
+                  onClick={() => handleStartAppraisal()}
+                  className="bg-gold hover:bg-gold-dark text-navy px-8 py-3 rounded-full font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <Sparkles size={18} /> 音を導き出す
+                </button>
+              </div>
 
-</html>
+              {/* --- NEW: 1-9 Number Buttons --- */}
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-center text-xs text-white/50 mb-3">自分の数字を知っている方はこちら</p>
+                <div className="grid grid-cols-5 gap-2 px-4">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                    <button
+                      key={n}
+                      onClick={() => handleStartAppraisal(n)}
+                      className="aspect-square rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-display text-lg font-bold hover:bg-gold hover:text-navy transition-all active:scale-90"
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Keyword Info */}
+          {currentNum !== null && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`bg-white/10 backdrop-blur-sm p-3 rounded-2xl text-sm transition-all ${
+                isChatMode ? 'w-[calc(100%-90px)]' : 'w-[85%] mt-4'
+              }`}
+            >
+              <div className="flex flex-col gap-1">
+                <span><span className="text-blue-300 font-bold">【使命】</span> {keywordsData[currentNum].m}</span>
+                <span><span className="text-yellow-400 font-bold">【エゴ】</span> {keywordsData[currentNum].e}</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Question Banner */}
+          <AnimatePresence>
+            {isChatMode && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mt-3 pt-3 border-t border-dashed border-gold/30"
+              >
+                <div className="text-[10px] text-gold font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
+                  <Pen size={10} /> あなたの相談内容
+                </div>
+                <div className="text-sm font-bold text-white line-clamp-2 leading-relaxed">
+                  {lastQuestion}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </header>
+
+        {/* --- Chat Container --- */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-[#FAFCFD]">
+          {messages.length === 0 && !currentNum && (
+            <div className="bg-white border border-gray-100 p-5 rounded-2xl shadow-sm rounded-bl-none text-sm leading-relaxed text-navy/80">
+              こんにちは。<br />あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br />まずはお名前（例:やまだはなこ）を入力するか、ご自身の数字を直接選んでください。
+            </div>
+          )}
+          
+          {messages.map((msg, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                msg.role === 'user' 
+                  ? 'ml-auto bg-gradient-to-br from-navy to-navy-light text-white rounded-br-none' 
+                  : 'bg-white border border-gray-100 rounded-bl-none'
+              }`}
+            >
+              {msg.text.split('\n').map((line, j) => <p key={j} className={j > 0 ? 'mt-2' : ''}>{line}</p>)}
+            </motion.div>
+          ))}
+
+          {isTyping && (
+            <div className="flex gap-1.5 p-4 bg-white border border-gray-100 rounded-2xl rounded-bl-none w-16 shadow-sm">
+              <motion.span animate={{ scale: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.4, times: [0, 0.4, 1] }} className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+              <motion.span animate={{ scale: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.4, times: [0, 0.4, 1], delay: 0.2 }} className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+              <motion.span animate={{ scale: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.4, times: [0, 0.4, 1], delay: 0.4 }} className="w-1.5 h-1.5 bg-gray-300 rounded-full" />
+            </div>
+          )}
+          <div ref={chatEndRef} />
+        </div>
+
+        {/* --- Input Area --- */}
+        <div className="p-4 border-t border-gray-100 bg-white flex gap-3">
+          <input 
+            type="text" 
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder={currentNum ? "お悩みをご相談ください..." : "まずは鑑定を始めてください"}
+            disabled={!currentNum}
+            className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-gold transition-colors text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+          />
+          <button 
+            onClick={handleSendMessage}
+            disabled={!currentNum || !chatInput.trim()}
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-dark text-white flex items-center justify-center shadow-lg active:scale-90 transition-all disabled:opacity-50 disabled:grayscale"
+          >
+            <Send size={20} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
