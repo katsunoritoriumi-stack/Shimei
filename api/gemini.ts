@@ -18,32 +18,44 @@ async function startServer() {
       const apiKey = process.env.GEMINI_API_KEY;
 
       if (!apiKey) {
-        return res.status(500).json({ error: "API key is missing" });
+        return res.status(500).json({ error: "現在アクセスが集中しています。しばらくしてからもう一度お試しください。" });
       }
 
       const ai = new GoogleGenAI({ apiKey });
-      const model = ai.models.generateContent({
-        model: "gemini-2.0-flash-exp", // Using a stable flash model
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: `
-あなたは熟練の数秘術鑑定士です。
+
+      const systemInstruction = `あなたは熟練の数秘術鑑定士です。
 相談者の「数秘（音の数字）」は「${currentNumber}」です。
 この数字の持つ意味（使命や性質）を背景に、相談者の悩みに寄り添い、具体的で温かいアドバイスを日本語で提供してください。
 
 【重要】回答の中に「カタカムナ」に関する内容は一切含めないでください。
 
-これまでの会話の流れ:
-${history ? history.map((m: any) => `${m.role === 'user' ? '相談者' : '鑑定士'}: ${m.text}`).join('\n') : 'なし'}
+【返答スタイルについて】
+- 番号付きリストや箇条書き、見出しなどの固定フォーマットは使わず、自然な会話文で返してください。
+- 毎回同じ構成・同じ書き出しにならないよう、内容や流れに合わせて表現を変えてください。
+- 会話の初期は丁寧に、打ち解けてきたら少し柔らかいトーンにするなど、流れに応じて変化させてください。
+- 返答が長くなりすぎないよう、伝えたいことを絞り込んでください。
+- 必要に応じて相談者に問いかけを添えるなど、対話のキャッチボールを意識してください。`;
 
-相談者のメッセージ:
-${userText}
-            ` }]
-          }
+      // 会話履歴をGeminiのcontents形式に変換
+      const historyContents = history
+        ? history.map((m: any) => ({
+            role: m.role === 'user' ? 'user' : 'model',
+            parts: [{ text: m.text }],
+          }))
+        : [];
+
+      const model = ai.models.generateContent({
+        model: "gemini-2.0-flash-exp",
+        contents: [
+          ...historyContents,
+          {
+            role: "user",
+            parts: [{ text: userText }],
+          },
         ],
         config: {
-          temperature: 0.7,
+          systemInstruction,
+          temperature: 0.9,
           topP: 0.95,
           topK: 40,
         }
@@ -53,7 +65,7 @@ ${userText}
       res.json({ text: response.text });
     } catch (error: any) {
       console.error("Gemini API Error:", error);
-      res.status(500).json({ error: error.message || "Internal Server Error" });
+      res.status(500).json({ error: "現在アクセスが集中しています。しばらくしてからもう一度お試しください。" });
     }
   });
 

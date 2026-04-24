@@ -196,11 +196,11 @@ export default function App() {
         setMessages(finalMessages);
         saveSession(finalMessages, currentNum, name, currentSessionId);
       } else {
-        addErrorMessage("申し訳ありません。鑑定中にエラーが発生しました。");
+        addErrorMessage("現在アクセスが集中しています。しばらくしてからもう一度お試しください。");
       }
     } catch (e) {
       setIsTyping(false);
-      addErrorMessage("通信エラーが発生しました。");
+      addErrorMessage("現在アクセスが集中しています。しばらくしてからもう一度お試しください。");
     }
   };
 
