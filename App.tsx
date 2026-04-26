@@ -153,9 +153,7 @@ export default function App() {
     let displayName = name;
 
     if (num === undefined) {
-      const calculated = calculateNumber(name);
-      if (calculated === null) return;
-      num = calculated === 0 ? 9 : calculated;
+      num = calculateNumber(name) || undefined;
       if (num === undefined) return;
     } else {
       displayName = `数秘 ${num} の方`;
