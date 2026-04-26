@@ -1,35 +1,43 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  Gem,
-  History,
-  ArrowLeft,
-  Send,
-  Trash2,
-  Clock,
-  Sparkles,
+import { 
+  Gem, 
+  History, 
+  ArrowLeft, 
+  Send, 
+  Trash2, 
+  Clock, 
+  Sparkles, 
+  Pen,
   Moon
 } from 'lucide-react';
 
 // --- Constants & Data ---
-const charValues: Record<string, number> = {
-  'あ': 18, 'い': 5, 'う': 19, 'え': 43, 'お': 40,
-  'か': 25, 'き': 29, 'く': 11, 'け': 35, 'こ': 16,
-  'さ': 28, 'し': 23, 'す': 21, 'せ': 36, 'そ': 30,
-  'た': 26, 'ち': 27, 'つ': 44, 'て': 9, 'と': 17,
-  'な': 14, 'に': 32, 'ぬ': 39, 'ね': 46, 'の': 20,
-  'は': 42, 'ひ': 1, 'ふ': 2, 'へ': 22, 'ほ': 47,
-  'ま': 6, 'み': 3, 'む': 13, 'め': 10, 'も': 33,
-  'や': 15, 'ゆ': 37, 'よ': 4, 'ら': 31, 'り': 8,
-  'る': 12, 'れ': 24, 'ろ': 34, 'わ': 7, 'ん': 48,
+const charValues: Record<string, number> = { 
+  'あ': 18, 'い': 5, 'う': 19, 'え': 43, 'お': 40, 
+  'か': 25, 'き': 29, 'く': 11, 'け': 35, 'こ': 16, 
+  'さ': 28, 'し': 23, 'す': 21, 'せ': 36, 'そ': 30, 
+  'た': 26, 'ち': 27, 'つ': 44, 'て': 9, 'と': 17, 
+  'な': 14, 'に': 32, 'ぬ': 39, 'ね': 46, 'の': 20, 
+  'は': 42, 'ひ': 1, 'ふ': 2, 'へ': 22, 'ほ': 47, 
+  'ま': 6, 'み': 3, 'む': 13, 'め': 10, 'も': 33, 
+  'や': 15, 'ゆ': 37, 'よ': 4, 'ら': 31, 'り': 8, 
+  'る': 12, 'れ': 24, 'ろ': 34, 'わ': 7, 'ん': 48, 
 };
 
-// 濁点・半濁点 → 元の清音へのマッピング（引き算するため）
 const dakutenMap: Record<string, string> = {
   'が': 'か', 'ぎ': 'き', 'ぐ': 'く', 'げ': 'け', 'ご': 'こ',
   'ざ': 'さ', 'じ': 'し', 'ず': 'す', 'ぜ': 'せ', 'ぞ': 'そ',
   'だ': 'た', 'ぢ': 'ち', 'づ': 'つ', 'で': 'て', 'ど': 'と',
   'ば': 'は', 'び': 'ひ', 'ぶ': 'ふ', 'べ': 'へ', 'ぼ': 'ほ',
+};
+
+const handakutenMap: Record<string, string> = {
   'ぱ': 'は', 'ぴ': 'ひ', 'ぷ': 'ふ', 'ぺ': 'へ', 'ぽ': 'ほ',
 };
 
@@ -75,7 +83,6 @@ export default function App() {
   const [lastQuestion, setLastQuestion] = useState('');
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const lastMsgRef = useRef<HTMLDivElement>(null);
 
   // --- Effects ---
   useEffect(() => {
@@ -90,10 +97,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isTyping) {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else if (lastMsgRef.current) {
-      lastMsgRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isTyping]);
 
@@ -122,20 +127,20 @@ export default function App() {
     });
   };
 
-  const calculateNumber = (inputName: string) => {
-    const cleanName = [...inputName].filter(ch => charValues[ch] || dakutenMap[ch]);
+  const calculateNumber = (inputName: string): number | null => {
+    const cleanName = [...inputName].filter(ch =>
+      charValues[ch] !== undefined ||
+      dakutenMap[ch] !== undefined ||
+      handakutenMap[ch] !== undefined
+    );
     if (!cleanName.length) return null;
 
     let total = 0;
     for (const char of cleanName) {
-      if (dakutenMap[char]) {
-        // 濁点・半濁点の文字は引き算
-        total -= charValues[dakutenMap[char]] || 0;
-      } else {
-        total += charValues[char] || 0;
-      }
+      if (dakutenMap[char]) total -= charValues[dakutenMap[char]] ?? 0;
+      else if (handakutenMap[char]) total += charValues[handakutenMap[char]] ?? 0;
+      else total += charValues[char] ?? 0;
     }
-    // 合計がマイナスになった場合も一桁に還元
     total = Math.abs(total);
     while (total >= 10) {
       total = total.toString().split('').map(Number).reduce((a, b) => a + b, 0);
@@ -148,7 +153,9 @@ export default function App() {
     let displayName = name;
 
     if (num === undefined) {
-      num = calculateNumber(name) || undefined;
+      const calculated = calculateNumber(name);
+      if (calculated === null) return;
+      num = calculated === 0 ? 9 : calculated;
       if (num === undefined) return;
     } else {
       displayName = `数秘 ${num} の方`;
@@ -164,7 +171,7 @@ export default function App() {
     setCurrentSessionId(sessionId);
     setName(displayName);
     setMessages([firstMsg]);
-    setIsChatMode(false);
+    setIsChatMode(false); // Start with appraisal result view
     saveSession([firstMsg], num, displayName, sessionId);
   };
 
@@ -174,7 +181,7 @@ export default function App() {
     const userText = chatInput.trim();
     const newUserMsg: Message = { role: 'user', text: userText };
     const updatedMessages = [...messages, newUserMsg];
-
+    
     setMessages(updatedMessages);
     setChatInput('');
     setIsChatMode(true);
@@ -188,26 +195,26 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: userText,
-          number: currentNum,
-          context: keywordsData[currentNum]
+          userText,
+          currentNumber: currentNum,
+          history: messages.slice(-5) // Send last few messages for context
         })
       });
 
       const data = await response.json();
       setIsTyping(false);
 
-      if (data.reply) {
-        const appMsg: Message = { role: 'app', text: data.reply };
+      if (data.text) {
+        const appMsg: Message = { role: 'app', text: data.text };
         const finalMessages = [...updatedMessages, appMsg];
         setMessages(finalMessages);
         saveSession(finalMessages, currentNum, name, currentSessionId);
       } else {
-        addErrorMessage("申し訳ありません。鑑定中にエラーが発生しました。");
+        addErrorMessage("現在アクセスが集中しています。しばらくしてからもう一度お試しください。");
       }
     } catch (e) {
       setIsTyping(false);
-      addErrorMessage("通信エラーが発生しました。");
+      addErrorMessage("現在アクセスが集中しています。しばらくしてからもう一度お試しください。");
     }
   };
 
@@ -246,11 +253,11 @@ export default function App() {
   return (
     <div className="flex justify-center items-center h-screen w-screen bg-paper overflow-hidden font-sans">
       <div className="w-full max-w-[500px] h-[98vh] bg-white flex flex-col rounded-3xl shadow-2xl overflow-hidden relative border border-black/5">
-
+        
         {/* --- History List Panel --- */}
         <AnimatePresence>
           {view === 'history' && (
-            <motion.div
+            <motion.div 
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -271,23 +278,20 @@ export default function App() {
                   </div>
                 ) : (
                   history.map(session => (
-                    <div
-                      key={session.id}
+                    <div 
+                      key={session.id} 
                       onClick={() => openDetail(session)}
                       className="bg-white rounded-2xl p-4 shadow-sm border-l-4 border-gold flex justify-between items-center cursor-pointer hover:translate-x-1 transition-transform group"
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-navy text-sm truncate">
-                          {session.messages.find(m => m.role === 'user')?.text || session.name}
-                        </div>
-                        <div className="text-[11px] text-gray-400 truncate">{session.name}</div>
-                        <div className="text-[11px] text-gray-400 mt-0.5">{formatDate(session.date)} ・ {session.messages.length}件</div>
+                      <div className="flex-1">
+                        <div className="font-bold text-navy">{session.name}</div>
+                        <div className="text-xs text-gray-400 mt-1">{formatDate(session.date)} ・ {session.messages.length}件</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gold to-gold-dark text-white flex items-center justify-center font-display text-xl font-bold shadow-md">
                           {session.num}
                         </div>
-                        <button
+                        <button 
                           onClick={(e) => deleteSession(session.id, e)}
                           className="text-gray-300 hover:text-red-500 p-2 transition-colors"
                         >
@@ -305,7 +309,7 @@ export default function App() {
         {/* --- History Detail Panel --- */}
         <AnimatePresence>
           {view === 'detail' && selectedSession && (
-            <motion.div
+            <motion.div 
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -316,9 +320,7 @@ export default function App() {
                 <button onClick={() => setView('history')} className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors">
                   <ArrowLeft size={18} />
                 </button>
-                <h2 className="flex-1 text-base truncate">
-                  {selectedSession.messages.find(m => m.role === 'user')?.text || selectedSession.name}
-                </h2>
+                <h2 className="flex-1 text-base truncate">{selectedSession.name}</h2>
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-gold-dark text-white flex items-center justify-center font-display text-lg font-bold">
                   {selectedSession.num}
                 </div>
@@ -330,8 +332,8 @@ export default function App() {
               <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-paper/30">
                 {selectedSession.messages.map((msg, i) => (
                   <div key={i} className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'ml-auto bg-gradient-to-br from-navy to-navy-light text-white rounded-br-none'
+                    msg.role === 'user' 
+                      ? 'ml-auto bg-gradient-to-br from-navy to-navy-light text-white rounded-br-none' 
                       : 'bg-white border border-gray-100 shadow-sm rounded-bl-none'
                   }`}>
                     {msg.text.split('\n').map((line, j) => <p key={j}>{line}</p>)}
@@ -342,115 +344,81 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* --- Main Header (compact) --- */}
-        <header className="bg-gradient-to-br from-navy to-navy-light text-white relative z-10 px-4 pt-3 pb-3">
-
-          {/* Row 1: Title + History button */}
-          <div className="flex justify-between items-center">
-            <h1
+        {/* --- Main Header --- */}
+        <header className={`bg-gradient-to-br from-navy to-navy-light text-white transition-all duration-500 relative z-10 ${
+          isChatMode ? 'p-3' : 'p-6 pb-8'
+        }`}>
+          <div className="flex justify-between items-center mb-4">
+            <h1 
               onClick={resetApp}
-              className="flex items-center gap-1.5 text-sm font-bold cursor-pointer opacity-90 hover:opacity-100 transition-opacity"
+              className={`flex items-center gap-2 cursor-pointer transition-all ${isChatMode ? 'text-lg' : 'text-2xl'}`}
             >
-              <Gem className="text-gold" size={15} /> 使命鑑定ナビ
+              <Gem className="text-gold" size={isChatMode ? 20 : 28} /> 使命鑑定ナビ
             </h1>
-            <button
+            <button 
               onClick={() => setView('history')}
-              className="bg-white/10 border border-white/20 px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1 hover:bg-white/20 transition-colors"
+              className="bg-white/10 border border-white/20 px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 hover:bg-white/20 transition-colors"
             >
-              <History size={11} /> 履歴
+              <History size={14} /> 履歴
             </button>
           </div>
 
-          {/* Row 2 (when number): keywords left + badge right */}
+          {/* Appraisal Result Badge */}
           <AnimatePresence>
             {currentNum !== null && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex items-center gap-3 mt-2"
+              <motion.div 
+                initial={{ scale: 0, opacity: 0, x: 50, y: -50 }}
+                animate={{ 
+                  scale: isChatMode ? 0.6 : 1, 
+                  opacity: 1, 
+                  x: 0, 
+                  y: 0,
+                  top: isChatMode ? 12 : 45,
+                  right: isChatMode ? 15 : 40
+                }}
+                className="absolute bg-gradient-to-br from-gold to-gold-dark rounded-full flex flex-col items-center justify-center border-4 border-white shadow-[0_0_30px_rgba(212,175,55,0.6)] z-30"
+                style={{ 
+                  width: isChatMode ? 80 : 120, 
+                  height: isChatMode ? 80 : 120,
+                  position: 'absolute'
+                }}
               >
-                {/* Left: mission/ego + question */}
-                <div className="flex-1 min-w-0 space-y-0.5">
-                  <div className="text-[11px] text-white/85 leading-snug truncate">
-                    <span className="text-blue-300 font-bold">使命</span>
-                    <span className="mx-1 text-white/40">|</span>
-                    {keywordsData[currentNum].m}
-                  </div>
-                  <div className="text-[11px] text-white/85 leading-snug truncate">
-                    <span className="text-yellow-400 font-bold">エゴ</span>
-                    <span className="mx-1 text-white/40">|</span>
-                    {keywordsData[currentNum].e}
-                  </div>
-                </div>
-
-                {/* Right: compact badge */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', damping: 16, stiffness: 180 }}
-                  className="rounded-full flex flex-col items-center justify-center border-[3px] border-white flex-shrink-0"
-                  style={{
-                    width: 72,
-                    height: 72,
-                    background: 'linear-gradient(135deg, #fffde7 0%, #ffd700 30%, #d4af37 65%, #9a7b0a 100%)',
-                    boxShadow: '0 0 22px rgba(212,175,55,0.95), 0 0 50px rgba(212,175,55,0.5), inset 0 1px 8px rgba(255,255,255,0.45)'
-                  }}
-                >
-                  <span className="text-[7px] font-bold text-navy/75 tracking-widest leading-none">あなたの音</span>
-                  <span className="font-display font-black text-navy leading-none text-[32px] mt-0.5">
-                    {currentNum}
-                  </span>
-                </motion.div>
+                <span className={`font-bold text-white/90 tracking-widest ${isChatMode ? 'text-[8px]' : 'text-[10px]'}`}>あなたの音</span>
+                <span className={`font-display font-bold text-white leading-none drop-shadow-md ${isChatMode ? 'text-4xl' : 'text-6xl'}`}>
+                  {currentNum}
+                </span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Question Banner (chat mode) */}
-          <AnimatePresence>
-            {isChatMode && lastQuestion && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mt-2 bg-white rounded-xl px-3 py-2 border-l-4 border-gold shadow-sm"
-              >
-                <div className="text-[9px] text-gold font-bold tracking-widest uppercase mb-0.5">
-                  あなたの相談内容
-                </div>
-                <div className="text-sm font-bold text-navy leading-snug line-clamp-2">
-                  {lastQuestion}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Input Area (initial, no number) */}
+          {/* Input Area (Initial) */}
           {!currentNum && (
-            <div className="mt-4 space-y-4">
-              <div className="flex flex-col items-center gap-3">
-                <input
-                  type="text"
+            <div className="mt-6 space-y-6">
+              <div className="flex flex-col items-center gap-4">
+                <input 
+                  type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="お名前（例:やまだはなこ）"
-                  className="w-[90%] px-5 py-2.5 rounded-full border-2 border-white/20 bg-white/10 text-white placeholder:text-white/40 text-center text-base font-klee outline-none focus:border-gold transition-colors"
+                  className="w-[90%] px-5 py-3 rounded-full border-2 border-white/20 bg-white/10 text-white placeholder:text-white/40 text-center text-lg font-klee outline-none focus:border-gold transition-colors"
                 />
-                <button
+                <button 
                   onClick={() => handleStartAppraisal()}
-                  className="bg-gold hover:bg-gold-dark text-navy px-7 py-2.5 rounded-full font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 text-sm"
+                  className="bg-gold hover:bg-gold-dark text-navy px-8 py-3 rounded-full font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2"
                 >
-                  <Sparkles size={16} /> 音を導き出す
+                  <Sparkles size={18} /> 音を導き出す
                 </button>
               </div>
-              <div className="border-t border-white/10 pt-3">
-                <p className="text-center text-[11px] text-white/50 mb-2">自分の数字を知っている方はこちら</p>
-                <div className="grid grid-cols-5 gap-1.5 px-3">
+
+              {/* --- NEW: 1-9 Number Buttons --- */}
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-center text-xs text-white/50 mb-3">自分の数字を知っている方はこちら</p>
+                <div className="grid grid-cols-5 gap-2 px-4">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
                     <button
                       key={n}
                       onClick={() => handleStartAppraisal(n)}
-                      className="aspect-square rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-display text-base font-bold hover:bg-gold hover:text-navy transition-all active:scale-90"
+                      className="aspect-square rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-display text-lg font-bold hover:bg-gold hover:text-navy transition-all active:scale-90"
                     >
                       {n}
                     </button>
@@ -459,6 +427,40 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {/* Keyword Info */}
+          {currentNum !== null && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`bg-white/10 backdrop-blur-sm p-3 rounded-2xl text-sm transition-all ${
+                isChatMode ? 'w-[calc(100%-90px)]' : 'w-[85%] mt-4'
+              }`}
+            >
+              <div className="flex flex-col gap-1">
+                <span><span className="text-blue-300 font-bold">【使命】</span> {keywordsData[currentNum].m}</span>
+                <span><span className="text-yellow-400 font-bold">【エゴ】</span> {keywordsData[currentNum].e}</span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Question Banner */}
+          <AnimatePresence>
+            {isChatMode && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mt-3 pt-3 border-t border-dashed border-gold/30"
+              >
+                <div className="text-[10px] text-gold font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
+                  <Pen size={10} /> あなたの相談内容
+                </div>
+                <div className="text-sm font-bold text-white line-clamp-2 leading-relaxed">
+                  {lastQuestion}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </header>
 
         {/* --- Chat Container --- */}
@@ -468,16 +470,15 @@ export default function App() {
               こんにちは。<br />あなたの「音」に刻まれた使命を解き明かし、魂が望む未来への道標をお渡しします。<br />まずはお名前（例:やまだはなこ）を入力するか、ご自身の数字を直接選んでください。
             </div>
           )}
-
+          
           {messages.map((msg, i) => (
-            <motion.div
+            <motion.div 
               key={i}
-              ref={i === messages.length - 1 ? lastMsgRef : undefined}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`max-w-[90%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                msg.role === 'user'
-                  ? 'ml-auto bg-gradient-to-br from-navy to-navy-light text-white rounded-br-none'
+                msg.role === 'user' 
+                  ? 'ml-auto bg-gradient-to-br from-navy to-navy-light text-white rounded-br-none' 
                   : 'bg-white border border-gray-100 rounded-bl-none'
               }`}
             >
@@ -497,8 +498,8 @@ export default function App() {
 
         {/* --- Input Area --- */}
         <div className="p-4 border-t border-gray-100 bg-white flex gap-3">
-          <input
-            type="text"
+          <input 
+            type="text" 
             value={chatInput}
             onChange={(e) => setChatInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -506,7 +507,7 @@ export default function App() {
             disabled={!currentNum}
             className="flex-1 px-5 py-3 rounded-full border border-gray-200 outline-none focus:border-gold transition-colors text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
           />
-          <button
+          <button 
             onClick={handleSendMessage}
             disabled={!currentNum || !chatInput.trim()}
             className="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-gold-dark text-white flex items-center justify-center shadow-lg active:scale-90 transition-all disabled:opacity-50 disabled:grayscale"
