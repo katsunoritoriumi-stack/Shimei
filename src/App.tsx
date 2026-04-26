@@ -28,11 +28,17 @@ const charValues: Record<string, number> = {
   'ま': 6, 'み': 3, 'む': 13, 'め': 10, 'も': 33, 
   'や': 15, 'ゆ': 37, 'よ': 4, 'ら': 31, 'り': 8, 
   'る': 12, 'れ': 24, 'ろ': 34, 'わ': 7, 'ん': 48, 
-  'が': 25, 'ぎ': 29, 'ぐ': 11, 'げ': 35, 'ご': 16, 
-  'ざ': 28, 'じ': 23, 'ず': 21, 'ぜ': 36, 'ぞ': 30, 
-  'だ': 26, 'ぢ': 27, 'づ': 44, 'で': 9, 'ど': 17, 
-  'ば': 42, 'び': 1, 'ぶ': 2, 'べ': 22, 'ぼ': 47, 
-  'ぱ': 42, 'ぴ': 1, 'ぷ': 2, 'ぺ': 22, 'ぽ': 47 
+};
+
+const dakutenMap: Record<string, string> = {
+  'が': 'か', 'ぎ': 'き', 'ぐ': 'く', 'げ': 'け', 'ご': 'こ',
+  'ざ': 'さ', 'じ': 'し', 'ず': 'す', 'ぜ': 'せ', 'ぞ': 'そ',
+  'だ': 'た', 'ぢ': 'ち', 'づ': 'つ', 'で': 'て', 'ど': 'と',
+  'ば': 'は', 'び': 'ひ', 'ぶ': 'ふ', 'べ': 'へ', 'ぼ': 'ほ',
+};
+
+const handakutenMap: Record<string, string> = {
+  'ぱ': 'は', 'ぴ': 'ひ', 'ぷ': 'ふ', 'ぺ': 'へ', 'ぽ': 'ほ',
 };
 
 const keywordsData: Record<number, { m: string; e: string }> = {
@@ -121,13 +127,19 @@ export default function App() {
     });
   };
 
-  const calculateNumber = (inputName: string) => {
-    const cleanName = inputName.replace(/[^ぁ-んが-ぼぱ-ぽ]/g, '');
-    if (!cleanName) return null;
+  const calculateNumber = (inputName: string): number | null => {
+    const cleanName = [...inputName].filter(ch =>
+      charValues[ch] !== undefined ||
+      dakutenMap[ch] !== undefined ||
+      handakutenMap[ch] !== undefined
+    );
+    if (!cleanName.length) return null;
 
     let total = 0;
     for (const char of cleanName) {
-      total += charValues[char] || 0;
+      if (dakutenMap[char]) total -= charValues[dakutenMap[char]] ?? 0;
+      else if (handakutenMap[char]) total += charValues[handakutenMap[char]] ?? 0;
+      else total += charValues[char] ?? 0;
     }
     total = Math.abs(total);
     while (total >= 10) {
